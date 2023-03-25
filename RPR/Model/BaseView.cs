@@ -19,5 +19,7 @@ namespace RPR.Model
         abstract public void Delete(UIElement element);
 
         abstract public void Delete(int elemID);
+
+        abstract public void DeleteAll();
     }
 }
