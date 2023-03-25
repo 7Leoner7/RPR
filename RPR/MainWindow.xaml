@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RPR"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid>
-        <Canvas x:Name="MainView" Margin="10,10,10,10" Background="Black"/>
+        <Canvas x:Name="MainView" Margin="10,10,10,10" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave"/>
     </Grid>
 </Window>
