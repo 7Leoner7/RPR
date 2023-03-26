@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\RPR"
   ],
-  "SelectedNode": "\\RPR.sln",
+  "SelectedNode": "\\RPR\\MainWindow.xaml",
   "PreviewInSolutionExplorer": false
 }

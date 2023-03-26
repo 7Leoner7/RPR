@@ -8,6 +8,8 @@ namespace RPR.Model
     {
         protected Canvas View { get; set; }
 
+        public Camera Camera { get; protected set; }
+
         protected bool IsInitialized { get; set; }
 
         abstract public void Init();

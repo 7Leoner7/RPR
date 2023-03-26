@@ -16,7 +16,6 @@ namespace RPR
         public MainWindow()
         {
             InitializeComponent();
-            game = new GameView(ref MainView);
         }
 
         private void MainView_Initialized(object sender, EventArgs e)
@@ -37,8 +36,14 @@ namespace RPR
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            game = new GameView(ref MainView);
             MainView.Dispatcher.InvokeAsync(() =>
                game.Init());
+        }
+
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            Coords.Content = "Mouse position: " + e.GetPosition(MainView) + " CameraPosition: " + game.Camera.Position;
         }
     }
 }
