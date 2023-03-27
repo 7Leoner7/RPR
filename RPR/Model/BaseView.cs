@@ -1,12 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace RPR.Model
 {
     public abstract class BaseView
     {
-        protected Canvas View { get; set; }
+        public Canvas View { get; protected set; }
 
         public Camera Camera { get; protected set; }
 

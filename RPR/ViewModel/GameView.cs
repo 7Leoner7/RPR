@@ -1,4 +1,5 @@
 ﻿using RPR.Model;
+using RPR.View;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +12,7 @@ namespace RPR.ViewModel
     public class GameView : BaseView
     {
         protected bool MoveCamera { get; set; }
+        protected Coords Coords { get; set; }
 
         public GameView(ref Canvas view)
         {
@@ -93,57 +95,21 @@ namespace RPR.ViewModel
                     Right = 0,
                     Top = child.Margin.Top + e.Velocity.Y
                 };
-                if (child is Line)
-                    if (((Line)child)?.Tag == "Coords-")
-                    {
-                        var Top = (Math.Abs(Camera.Position.Y) / (Camera.HeightProjection / 2) <= 0.95)
-                            ? child.Margin.Top : child.Margin.Top - e.Velocity.Y;
-                        child.Margin = new Thickness()
-                        {
-                            Bottom = 0,
-                            Left = child.Margin.Left + e.Velocity.X,
-                            Right = 0,
-                            Top = Top,
-                        };
-                    }
-                    else if (((Line)child)?.Tag == "Coords|")
-                    {
-                        var Left = (Math.Abs(Camera.Position.X) / (Camera.WidthProjection / 2) <= 0.95)
-                            ? child.Margin.Left : child.Margin.Left + e.Velocity.X;
-                        child.Margin = new Thickness()
-                        {
-                            Bottom = 0,
-                            Left = Left,
-                            Right = 0,
-                            Top = child.Margin.Top - e.Velocity.Y,
-                        };
-                    }
             }
+            Coords.Update(e);
         }
 
         private void InitCoords()
         {
-            Line line = new Line();
-            line.X1 = 0;
-            line.Y1 = View.ActualHeight / 2;
-            line.X2 = View.ActualWidth;
-            line.Y2 = View.ActualHeight / 2;
-            line.Stroke = new SolidColorBrush(Colors.White);
-            line.StrokeThickness = 2;
-            line.Tag = "Coords-";
+            Line X = new Line();
+            Line Y = new Line();
+            var view = View;
+            var camera = Camera;
+            Coords = new Coords(ref X, ref Y, ref view, ref camera);
+            Coords.Init();
 
-            Update(line);
-
-            line = new Line();
-            line.X1 = View.ActualWidth / 2;
-            line.Y1 = 0;
-            line.X2 = View.ActualWidth / 2;
-            line.Y2 = View.ActualHeight;
-            line.Stroke = new SolidColorBrush(Colors.White);
-            line.StrokeThickness = 2;
-            line.Tag = "Coords|";
-
-            Update(line);
+            Update(Coords.X);
+            Update(Coords.Y);
         }
 
         async public override void Init()
