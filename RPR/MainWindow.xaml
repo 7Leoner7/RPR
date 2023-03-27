@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" MouseMove="Window_MouseMove" MinWidth="600" MinHeight="300" WindowState="Maximized">
     <Grid>
-        <Canvas x:Name="MainView" Margin="0,0,0,40" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave"/>
+        <Canvas x:Name="MainView" Margin="0,0,0,40" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave">
+        </Canvas>
         <Label x:Name="Coords" Margin="0,0,0,1" Content="Label" BorderBrush="Black" Foreground="#FFFBFBFB" Background="Black" HorizontalAlignment="Center" Width="798" Height="33" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

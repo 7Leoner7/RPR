@@ -11,6 +11,7 @@ namespace RPR.Model
 
         public override void UpdatePosition(Vector vector)
         {
+            vector.X *= -1;
             var CameraEvent = new EventArgsCamera()
             {
                 Velocity = vector,
