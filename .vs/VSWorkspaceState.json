@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\RPR"
+    "\\RPR",
+    "\\RPR\\ViewModel"
   ],
-  "SelectedNode": "\\RPR\\MainWindow.xaml",
+  "SelectedNode": "\\RPR\\ViewModel\\GameView.cs",
   "PreviewInSolutionExplorer": false
 }

@@ -17,15 +17,21 @@ namespace RPR.ViewModel
             View = view;
             View.MouseMove += View_MouseMove;
             View.SizeChanged += View_SizeChanged;
+            View.MouseWheel += View_MouseWheel;
             MoveCamera = false;
 
             Camera = new Camera();
             Camera.OnUpdatePosition += Camera_OnUpdatePosition;
             Camera.OnUpdateProjection += Camera_OnUpdateProjection;
             Camera.OnUpdateRateSize += Camera_OnUpdateRateSize;
-            //Camera.UpdateRateSize(1);
+            Camera.UpdateRateSize(1);
             //Camera.UpdateProjections(View.ActualWidth, View.ActualHeight);
             Camera.PositionRelativeCanvas = new Point(View.ActualWidth / 2, View.ActualHeight / 2);
+        }
+
+        private void View_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            Camera.UpdateRateSize(Camera.Rate_Size / (e.Delta < 0 ? 15.0/10 : 10.0/15));
         }
 
         private void View_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -50,19 +56,23 @@ namespace RPR.ViewModel
                     Camera.UpdatePosition((Vector)(new_p - old_p));
                     old_p = new_p;
                     new_p = null;
-                    MoveCamera= false;
+                    MoveCamera = false;
                 }
             }
             else
             {
-                old_p = null; 
+                old_p = null;
                 new_p = null;
             }
         }
 
         private void Camera_OnUpdateRateSize(Camera camera, EventArgsCamera e)
         {
-            throw new NotImplementedException();
+            foreach (Shape child in this.View.Children)
+            {
+                child.Width = child.Width * e.RateSize.Y / e.RateSize.X > 0 ? child.Width * e.RateSize.Y / e.RateSize.X : child.Width;
+                child.Height = child.Height * e.RateSize.Y / e.RateSize.X > 0 ? child.Height * e.RateSize.Y / e.RateSize.X : child.Height;
+            }
         }
 
         private void Camera_OnUpdateProjection(Camera camera, EventArgsCamera e)
@@ -89,25 +99,24 @@ namespace RPR.ViewModel
             var rand = new Random();
             var Width = 100;
             var Height = 100;
-            var vec = new System.Windows.Vector(rand.NextDouble(), rand.NextDouble());
-            var speed = 0;
-            var FrameSpeed = 1000 / 144;
+            var vec = new Vector(rand.NextDouble(), rand.NextDouble());
+            var speed = 10;
+            var FrameSpeed = 1000 / 1000;
             vec.X *= speed;
             vec.Y *= speed;
-            var pos = new Thickness()
-            {
-                Bottom = 0, //rand.Next(Height, (int)View.ActualHeight - Height),
-                Left = rand.Next(Width, (int)View.ActualWidth - Width),
-                Right = 0, //rand.Next(Width, (int)View.ActualWidth - Width),
-                Top = rand.Next(Height, (int)View.ActualHeight - Height)
-            };
 
             var ellipse = new Ellipse()
             {
                 Width = Width,
                 Height = Height,
                 Fill = new SolidColorBrush(Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))),
-                Margin = pos
+                Margin = new Thickness()
+                {
+                    Bottom = 0,
+                    Left = rand.Next(Width, (int)View.ActualWidth - Width),
+                    Right = 0,
+                    Top = rand.Next(Height, (int)View.ActualHeight - Height)
+                },
             };
             ellipse.MouseDown += Ellipse_MouseDown;
             Update(ellipse);
@@ -116,20 +125,11 @@ namespace RPR.ViewModel
 
             for (; IsInitialized;)
             {
-                if ((pos.Top + vec.Y + Height > View.ActualHeight) || (pos.Top + vec.Y <= 0))
+                if ((ellipse.Margin.Top + vec.Y + Height > View.ActualHeight) || (ellipse.Margin.Top + vec.Y <= 0))
                     vec.Y *= -1;
 
-                if ((pos.Left + vec.X + Width > View.ActualWidth) || (pos.Left + vec.X <= 0))
+                if ((ellipse.Margin.Left + vec.X + Width > View.ActualWidth) || (ellipse.Margin.Left + vec.X <= 0))
                     vec.X *= -1;
-
-                //if ((pos.Top > View.ActualHeight) || (pos.Top < 0) || (pos.Left > View.ActualWidth) || (pos.Left < 0))
-                //    pos = new Thickness()
-                //    {
-                //        Bottom = 0,
-                //        Left = rand.Next(Width, (int)View.ActualWidth - Width),
-                //        Right = 0,
-                //        Top = rand.Next(Height, (int)View.ActualHeight - Height)
-                //    };
 
                 if ((View.ActualHeight <= 0) || (View.ActualWidth <= 0)) continue;
 
@@ -146,7 +146,7 @@ namespace RPR.ViewModel
 
         private void Ellipse_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            DeInit();
+           //DeInit();
             var shape = (Shape)sender;
             var rand = new Random();
             shape.Fill = new SolidColorBrush(Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));
