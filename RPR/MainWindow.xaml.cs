@@ -25,13 +25,12 @@ namespace RPR
 
         async private void MainView_MouseEnter(object sender, MouseEventArgs e)
         {
-            //MainView.Dispatcher.InvokeAsync(()=>
-            //    game.Init());
+
         }
 
         private void MainView_MouseLeave(object sender, MouseEventArgs e)
         {
-            //game.DeInit();
+
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

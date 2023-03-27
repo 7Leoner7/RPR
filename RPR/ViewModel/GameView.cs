@@ -1,6 +1,7 @@
 ﻿using RPR.Model;
 using RPR.View;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -74,6 +75,7 @@ namespace RPR.ViewModel
         {
             foreach (Shape child in this.View.Children)
             {
+                if (child is TestShape) continue;
                 child.Width = child.Width * e.RateSize.Y / e.RateSize.X > 0 ? child.Width * e.RateSize.Y / e.RateSize.X : child.Width;
                 child.Height = child.Height * e.RateSize.Y / e.RateSize.X > 0 ? child.Height * e.RateSize.Y / e.RateSize.X : child.Height;
             }
@@ -81,7 +83,7 @@ namespace RPR.ViewModel
 
         private void Camera_OnUpdateProjection(Camera camera, EventArgsCamera e)
         {
-           
+
         }
 
         private void Camera_OnUpdatePosition(Camera camera, EventArgsCamera e)
@@ -166,7 +168,6 @@ namespace RPR.ViewModel
 
         private void Ellipse_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            //DeInit();
             var shape = (Shape)sender;
             var rand = new Random();
             shape.Fill = new SolidColorBrush(Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));
@@ -185,6 +186,12 @@ namespace RPR.ViewModel
                 View.Children.Add(element);
             }
             else View.Children.Add(element);
+        }
+
+        public override void UpdateAll(List<UIElement> elements)
+        {
+            foreach (UIElement element in elements)
+               Update(element);    
         }
 
         public override void Delete(UIElement element)

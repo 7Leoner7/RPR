@@ -43,7 +43,7 @@ namespace RPR.View
 
         public void Update(EventArgsCamera e)
         {
-            var Top = (Math.Abs(Camera.Position.Y) / (Camera.HeightProjection / 2) <= 0.98)
+            var Top = ((Camera.HeightProjection / 2) - Math.Abs(Camera.Position.Y) >= 10)
                 ? X.Margin.Top : X.Margin.Top - e.Velocity.Y;
             X.Margin = new Thickness()
             {
@@ -53,7 +53,7 @@ namespace RPR.View
                 Top = Top,
             };
 
-            var Left = (Math.Abs(Camera.Position.X) / (Camera.WidthProjection / 2) <= 0.99)
+            var Left = ((Camera.WidthProjection / 2) - Math.Abs(Camera.Position.X) >= 10)
                 ? Y.Margin.Left : Y.Margin.Left + e.Velocity.X;
             Y.Margin = new Thickness()
             {

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RPR.Model
@@ -22,5 +23,7 @@ namespace RPR.Model
         abstract public void Delete(int elemID);
 
         abstract public void DeleteAll();
+
+        abstract public void UpdateAll(List<UIElement> element);
     }
 }
