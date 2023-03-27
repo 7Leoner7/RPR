@@ -61,6 +61,7 @@ namespace RPR.ViewModel
                     MoveCamera = true;
                     Vector vector = (Vector)(new_p - old_p);
                     vector.X *= -1;
+                    if(vector.X != double.NaN)
                     Camera.UpdatePosition(vector);
                     old_p = new_p;
                     new_p = null;
