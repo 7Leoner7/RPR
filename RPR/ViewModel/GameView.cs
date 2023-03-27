@@ -13,7 +13,7 @@ namespace RPR.ViewModel
     public class GameView : BaseView
     {
         protected bool MoveCamera { get; set; }
-        protected Coords Coords { get; set; }
+        public Coords Coords { get; protected set; }
 
         public GameView(ref Canvas view)
         {
@@ -42,6 +42,7 @@ namespace RPR.ViewModel
             Camera.PositionRelativeCanvas = new Point(View.ActualWidth / 2, View.ActualHeight / 2);
             var rate = Math.Sqrt(e.NewSize.Width + e.NewSize.Height) / Math.Sqrt(e.PreviousSize.Width + e.PreviousSize.Height);
             Camera.UpdateRateSize(Camera.Rate_Size * rate);
+            Camera.UpdateProjections(View.ActualWidth, View.ActualHeight);
         }
 
         Point? new_p = null;
@@ -58,7 +59,9 @@ namespace RPR.ViewModel
                 else
                 {
                     MoveCamera = true;
-                    Camera.UpdatePosition((Vector)(new_p - old_p));
+                    Vector vector = (Vector)(new_p - old_p);
+                    vector.X *= -1;
+                    Camera.UpdatePosition(vector);
                     old_p = new_p;
                     new_p = null;
                     MoveCamera = false;
@@ -83,7 +86,13 @@ namespace RPR.ViewModel
 
         private void Camera_OnUpdateProjection(Camera camera, EventArgsCamera e)
         {
-
+            Coords?.Init();
+            foreach (Shape child in this.View.Children)
+            {
+                if (child.Tag != null) continue;
+                if (child is TestShape) continue;
+                child.Margin = new Thickness(child.Margin.Left * (e.Width.Y / e.Width.X), child.Margin.Top * (e.Height.Y / e.Height.X), child.Margin.Right, child.Margin.Bottom);
+            }
         }
 
         private void Camera_OnUpdatePosition(Camera camera, EventArgsCamera e)
@@ -119,7 +128,7 @@ namespace RPR.ViewModel
             InitCoords();
 
             var rand = new Random();
-            var Width = 100;
+            var Width = 50;
             var Height = 100;
             var vec = new Vector(rand.NextDouble(), rand.NextDouble());
             var speed = 2.5;
@@ -191,7 +200,7 @@ namespace RPR.ViewModel
         public override void UpdateAll(List<UIElement> elements)
         {
             foreach (UIElement element in elements)
-               Update(element);    
+                Update(element);
         }
 
         public override void Delete(UIElement element)

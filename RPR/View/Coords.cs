@@ -41,6 +41,12 @@ namespace RPR.View
             Y.Tag = "Coords|";
         }
 
+        public void ToBegin()
+        {
+            X.Margin = new Thickness(0);
+            Y.Margin = new Thickness(0);
+        }
+
         public void Update(EventArgsCamera e)
         {
             var Top = ((Camera.HeightProjection / 2) - Math.Abs(Camera.Position.Y) >= 10)

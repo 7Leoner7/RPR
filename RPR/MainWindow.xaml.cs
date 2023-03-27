@@ -1,6 +1,5 @@
 ﻿using RPR.ViewModel;
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -16,6 +15,7 @@ namespace RPR
         public MainWindow()
         {
             InitializeComponent();
+            this.KeyDown += View_GoToTheBegin;
         }
 
         private void MainView_Initialized(object sender, EventArgs e)
@@ -38,6 +38,16 @@ namespace RPR
             game = new GameView(ref MainView);
             MainView.Dispatcher.InvokeAsync(() =>
                game.Init());
+        }
+
+        private void View_GoToTheBegin(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F1)
+            {
+                game.Camera.GoToTheBegin();
+                game.Coords.ToBegin();
+            }
+
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
