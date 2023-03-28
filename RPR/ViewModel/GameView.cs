@@ -158,11 +158,15 @@ namespace RPR.ViewModel
             ellipse.MouseDown += Ellipse_MouseDown;
             ellipse.Tag = "View_Shape";
 
-            Line trail = new Line();
+            Ellipse trail = new Ellipse();
 
             IsInitialized = true;
             trail.StrokeThickness = 5;
-            trail.Stroke = new SolidColorBrush(Colors.White);
+            //trail.Stroke = new SolidColorBrush(Colors.White);
+            trail.Fill = new SolidColorBrush(Color.FromScRgb(0.15f, 255, 255, 255));
+            trail.Width = 100;
+            trail.Height = 100;
+
             Update(trail);
             Update(ellipse);
 
@@ -170,24 +174,30 @@ namespace RPR.ViewModel
             for (; IsInitialized;)
             {
 
-                trail.X1 = (ellipse.Margin.Left + ellipse.ActualWidth / 2 + trail.StrokeThickness) - (vec.X * speed * 5);
-                trail.X2 = ellipse.Margin.Left + vec.X + ellipse.ActualWidth / 2 + trail.StrokeThickness;
-                trail.Y1 = (ellipse.Margin.Top + ellipse.ActualHeight / 2 + trail.StrokeThickness) - (vec.Y * speed * 5);
-                trail.Y2 = ellipse.Margin.Top + vec.Y + ellipse.ActualHeight / 2 + trail.StrokeThickness;
+                //trail.X1 = (ellipse.Margin.Left + ellipse.ActualWidth / 2 + trail.StrokeThickness) - (vec.X * speed * 5);
+                //trail.X2 = ellipse.Margin.Left + vec.X + ellipse.ActualWidth / 2 + trail.StrokeThickness;
+                //trail.Y1 = (ellipse.Margin.Top + ellipse.ActualHeight / 2 + trail.StrokeThickness) - (vec.Y * speed * 5);
+                //trail.Y2 = ellipse.Margin.Top + vec.Y + ellipse.ActualHeight / 2 + trail.StrokeThickness;
 
                 if ((ellipse.Margin.Top + vec.Y + ellipse.ActualHeight > View.ActualHeight) || (ellipse.Margin.Top + vec.Y <= 0))
                 {
                     vec.Y *= -1;
-                    trail.Stroke = new SolidColorBrush(Color.FromRgb((byte)rand.Next(100, 255), (byte)rand.Next(75, 255), (byte)rand.Next(50, 255)));
                 }
 
                 if ((ellipse.Margin.Left + vec.X + ellipse.ActualWidth > View.ActualWidth) || (ellipse.Margin.Left + vec.X <= 0))
                 {
                     vec.X *= -1;
-                    trail.Stroke = new SolidColorBrush(Color.FromRgb((byte)rand.Next(100, 255), (byte)rand.Next(75, 255), (byte)rand.Next(50, 255)));
                 }
 
                 if ((View.ActualHeight <= 0) || (View.ActualWidth <= 0)) continue;
+
+                trail.Margin = new Thickness()
+                {
+                    Right = 0,
+                    Bottom = 0,
+                    Left = ellipse.Margin.Left - vec.X,
+                    Top = ellipse.Margin.Top - vec.Y,
+                };
 
                 ellipse.Margin = new Thickness()
                 {
