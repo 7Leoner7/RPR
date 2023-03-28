@@ -47,31 +47,38 @@ namespace RPR.View
             Y.Margin = new Thickness(0);
         }
 
-
-        /// <summary>
-        /// Работает с недочётами
-        /// </summary>
-        /// <param name="e"></param>
         public void Update(EventArgsCamera e)
         {
-            var Top = ((Camera.HeightProjection / 2) - Math.Abs(Camera.Position.Y) >= 10) //!!!
-                ? X.Margin.Top : X.Margin.Top - e.Velocity.Y;
+            var dist = 10;
+
+            var Top = Camera.Position.Y; 
+
+            if ((Top > Camera.HeightProjection / 2 - dist))
+                Top = Camera.HeightProjection / 2 - dist;
+            if ((Top < - Camera.HeightProjection / 2 + dist))
+                Top = - Camera.HeightProjection / 2 + dist;
+
             X.Margin = new Thickness()
             {
                 Bottom = 0,
-                Left = X.Margin.Left + e.Velocity.X,
+                Left = X.Margin.Left,
                 Right = 0,
                 Top = Top,
             };
 
-            var Left = ((Camera.WidthProjection / 2) - Math.Abs(Camera.Position.X) >= 10) ///!!!
-                ? Y.Margin.Left : Y.Margin.Left + e.Velocity.X;
+            var Left = Camera.Position.X;
+
+            if ((Left > Camera.WidthProjection / 2 - dist))
+                Left = Camera.WidthProjection / 2 - dist;
+            if ((Left < -Camera.WidthProjection / 2 + dist))
+                Left = -Camera.WidthProjection / 2 + dist;
+
             Y.Margin = new Thickness()
             {
                 Bottom = 0,
-                Left = Left,
+                Left = -Left,
                 Right = 0,
-                Top = Y.Margin.Top - e.Velocity.Y,
+                Top = Y.Margin.Top,
             };
         }
     }

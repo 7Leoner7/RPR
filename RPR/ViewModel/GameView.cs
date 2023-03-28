@@ -61,7 +61,10 @@ namespace RPR.ViewModel
                     MoveCamera = true;
                     Vector vector = (Vector)(new_p - old_p);
                     vector.X *= -1;
-                    if(vector.X != double.NaN)
+                    //Ограничение скорости
+                    //vector.X = Math.Abs(vector.X) > 10 ? (vector.X > 0 ? 10 : -10): vector.X;
+                    //vector.Y = Math.Abs(vector.Y) > 10 ? (vector.Y > 0 ? 10 : -10) : vector.Y;
+                   
                     Camera.UpdatePosition(vector);
                     old_p = new_p;
                     new_p = null;
@@ -100,6 +103,7 @@ namespace RPR.ViewModel
         {
             foreach (Shape child in this.View.Children)
             {
+                if(child.Tag != null) continue;
                 child.Margin = new Thickness()
                 {
                     Bottom = 0,
