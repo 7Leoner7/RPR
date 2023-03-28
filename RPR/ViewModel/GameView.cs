@@ -64,7 +64,7 @@ namespace RPR.ViewModel
                     //Ограничение скорости
                     //vector.X = Math.Abs(vector.X) > 10 ? (vector.X > 0 ? 10 : -10): vector.X;
                     //vector.Y = Math.Abs(vector.Y) > 10 ? (vector.Y > 0 ? 10 : -10) : vector.Y;
-                   
+
                     Camera.UpdatePosition(vector);
                     old_p = new_p;
                     new_p = null;
@@ -103,7 +103,7 @@ namespace RPR.ViewModel
         {
             foreach (Shape child in this.View.Children)
             {
-                if(child.Tag != null) continue;
+                if (child.Tag != "View_Shape") continue;
                 child.Margin = new Thickness()
                 {
                     Bottom = 0,
@@ -132,16 +132,16 @@ namespace RPR.ViewModel
         {
             InitCoords();
 
+            var FrameSpeed = 1000 / 144;
+
             //InitElements
             var rand = new Random();
-            var Width = 50;
+            var Width = 100;
             var Height = 100;
-            var vec = new Vector(0.5, 0.5);
-            var speed = 10;
-            var FrameSpeed = 1000 / 1000;
+            var vec = new Vector(0.4, 0.5);
+            var speed = 5 * 10;
             vec.X *= speed;
             vec.Y *= speed;
-
             var ellipse = new Ellipse()
             {
                 Width = Width,
@@ -156,17 +156,36 @@ namespace RPR.ViewModel
                 },
             };
             ellipse.MouseDown += Ellipse_MouseDown;
-            Update(ellipse);
+            ellipse.Tag = "View_Shape";
+
+            Line trail = new Line();
 
             IsInitialized = true;
+            trail.StrokeThickness = 5;
+            trail.Stroke = new SolidColorBrush(Colors.White);
+            Update(trail);
+            Update(ellipse);
+
             //InitLoop
             for (; IsInitialized;)
             {
+
+                trail.X1 = (ellipse.Margin.Left + ellipse.ActualWidth / 2 + trail.StrokeThickness) - (vec.X * speed * 5);
+                trail.X2 = ellipse.Margin.Left + vec.X + ellipse.ActualWidth / 2 + trail.StrokeThickness;
+                trail.Y1 = (ellipse.Margin.Top + ellipse.ActualHeight / 2 + trail.StrokeThickness) - (vec.Y * speed * 5);
+                trail.Y2 = ellipse.Margin.Top + vec.Y + ellipse.ActualHeight / 2 + trail.StrokeThickness;
+
                 if ((ellipse.Margin.Top + vec.Y + ellipse.ActualHeight > View.ActualHeight) || (ellipse.Margin.Top + vec.Y <= 0))
-                    vec.Y *= -0.99;
+                {
+                    vec.Y *= -1;
+                    trail.Stroke = new SolidColorBrush(Color.FromRgb((byte)rand.Next(100, 255), (byte)rand.Next(75, 255), (byte)rand.Next(50, 255)));
+                }
 
                 if ((ellipse.Margin.Left + vec.X + ellipse.ActualWidth > View.ActualWidth) || (ellipse.Margin.Left + vec.X <= 0))
-                    vec.X *= -1.01;
+                {
+                    vec.X *= -1;
+                    trail.Stroke = new SolidColorBrush(Color.FromRgb((byte)rand.Next(100, 255), (byte)rand.Next(75, 255), (byte)rand.Next(50, 255)));
+                }
 
                 if ((View.ActualHeight <= 0) || (View.ActualWidth <= 0)) continue;
 
@@ -174,9 +193,10 @@ namespace RPR.ViewModel
                 {
                     Right = 0,
                     Bottom = 0,
-                    Left = ellipse.Margin.Left + vec.X * speed,
-                    Top = ellipse.Margin.Top + vec.Y * speed,
+                    Left = ellipse.Margin.Left + vec.X,
+                    Top = ellipse.Margin.Top + vec.Y,
                 };
+
                 await Task.Delay(FrameSpeed);
             }
         }
