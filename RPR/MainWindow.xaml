@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RPR"
         mc:Ignorable="d"
-        Title="RPR" Height="450" Width="800" Loaded="Window_Loaded" MouseMove="Window_MouseMove" MinWidth="600" MinHeight="300" WindowState="Maximized">
+        Title="RPR" Height="450" Width="800" Loaded="Window_Loaded" MouseMove="Window_MouseMove" MinWidth="600" MinHeight="450" WindowState="Maximized">
     <Grid>
         <Canvas x:Name="MainView" Margin="0,0,0,40" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave">
-            <local:TestShape x:Name="TestF" Width="150" Height="150" StrokeThickness="2" Stroke="White" Margin="960, 460, 0, 0"></local:TestShape>
+            <local:TestShape x:Name="TestF" Width="150" Height="150" StrokeThickness="2" Stroke="White" Canvas.Left="4" Canvas.Top="9"/>
         </Canvas>
         <Label x:Name="Coords" Content="Label" BorderBrush="Black" Foreground="#FFFBFBFB" Background="Black" Height="41" VerticalAlignment="Bottom"/>
     </Grid>

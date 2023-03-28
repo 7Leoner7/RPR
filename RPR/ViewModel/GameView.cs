@@ -132,12 +132,13 @@ namespace RPR.ViewModel
         {
             InitCoords();
 
+            //InitElements
             var rand = new Random();
             var Width = 50;
             var Height = 100;
-            var vec = new Vector(rand.NextDouble(), rand.NextDouble());
-            var speed = 2.5;
-            var FrameSpeed = 1000 / 90;
+            var vec = new Vector(0.5, 0.5);
+            var speed = 10;
+            var FrameSpeed = 1000 / 1000;
             vec.X *= speed;
             vec.Y *= speed;
 
@@ -158,14 +159,14 @@ namespace RPR.ViewModel
             Update(ellipse);
 
             IsInitialized = true;
-
+            //InitLoop
             for (; IsInitialized;)
             {
                 if ((ellipse.Margin.Top + vec.Y + ellipse.ActualHeight > View.ActualHeight) || (ellipse.Margin.Top + vec.Y <= 0))
-                    vec.Y *= -1;
+                    vec.Y *= -0.99;
 
                 if ((ellipse.Margin.Left + vec.X + ellipse.ActualWidth > View.ActualWidth) || (ellipse.Margin.Left + vec.X <= 0))
-                    vec.X *= -1;
+                    vec.X *= -1.01;
 
                 if ((View.ActualHeight <= 0) || (View.ActualWidth <= 0)) continue;
 
