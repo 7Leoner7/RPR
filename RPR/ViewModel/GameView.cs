@@ -14,6 +14,7 @@ namespace RPR.ViewModel
     {
         protected bool MoveCamera { get; set; }
         public Coords Coords { get; protected set; }
+        public int FrameSpeed { get; set; }
 
         public GameView(ref Canvas view)
         {
@@ -22,6 +23,8 @@ namespace RPR.ViewModel
             View.SizeChanged += View_SizeChanged;
             View.MouseWheel += View_MouseWheel;
             MoveCamera = false;
+
+            FrameSpeed = 1000 / 144;
 
             Camera = new Camera();
             Camera.OnUpdatePosition += Camera_OnUpdatePosition;
@@ -132,14 +135,12 @@ namespace RPR.ViewModel
         {
             InitCoords();
 
-            var FrameSpeed = 1000/144;
-
             //InitElements
             var rand = new Random();
             var Width = 100;
             var Height = 100;
             var vec = new Vector(0.4, 0.5);
-            var speed = 5 * 10;
+            var speed = 5 * 7;
             vec.X *= speed;
             vec.Y *= speed;
             var ellipse = new Ellipse()
@@ -158,18 +159,19 @@ namespace RPR.ViewModel
             ellipse.MouseDown += Ellipse_MouseDown;
             ellipse.Tag = "View_Shape";
 
+            var test = new SmartShape<Ellipse>(ellipse);
+
             Ellipse trail = new Ellipse();
 
-            IsInitialized = true;
             trail.StrokeThickness = 5;
-            //trail.Stroke = new SolidColorBrush(Colors.White);
             trail.Fill = new SolidColorBrush(Color.FromScRgb(0.15f, 255, 255, 255));
             trail.Width = 100;
             trail.Height = 100;
 
             Update(trail);
             Update(ellipse);
-
+            
+            IsInitialized = true;
             //InitLoop
             for (; IsInitialized;)
             {
@@ -193,13 +195,15 @@ namespace RPR.ViewModel
                     Top = ellipse.Margin.Top - vec.Y,
                 };
 
-                ellipse.Margin = new Thickness()
-                {
-                    Right = 0,
-                    Bottom = 0,
-                    Left = ellipse.Margin.Left + vec.X,
-                    Top = ellipse.Margin.Top + vec.Y,
-                };
+                test.PossitionRelativeView += vec;
+
+                //ellipse.Margin = new Thickness()
+                //{
+                //    Right = 0,
+                //    Bottom = 0,
+                //    Left = ellipse.Margin.Left + vec.X,
+                //    Top = ellipse.Margin.Top + vec.Y,
+                //};
 
                 await Task.Delay(FrameSpeed);
             }
