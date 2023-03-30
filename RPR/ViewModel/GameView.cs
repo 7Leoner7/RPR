@@ -132,7 +132,7 @@ namespace RPR.ViewModel
         {
             InitCoords();
 
-            var FrameSpeed = 1000 / 144;
+            var FrameSpeed = 1000/144;
 
             //InitElements
             var rand = new Random();
@@ -173,12 +173,6 @@ namespace RPR.ViewModel
             //InitLoop
             for (; IsInitialized;)
             {
-
-                //trail.X1 = (ellipse.Margin.Left + ellipse.ActualWidth / 2 + trail.StrokeThickness) - (vec.X * speed * 5);
-                //trail.X2 = ellipse.Margin.Left + vec.X + ellipse.ActualWidth / 2 + trail.StrokeThickness;
-                //trail.Y1 = (ellipse.Margin.Top + ellipse.ActualHeight / 2 + trail.StrokeThickness) - (vec.Y * speed * 5);
-                //trail.Y2 = ellipse.Margin.Top + vec.Y + ellipse.ActualHeight / 2 + trail.StrokeThickness;
-
                 if ((ellipse.Margin.Top + vec.Y + ellipse.ActualHeight > View.ActualHeight) || (ellipse.Margin.Top + vec.Y <= 0))
                 {
                     vec.Y *= -1;

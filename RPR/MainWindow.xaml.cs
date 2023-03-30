@@ -1,7 +1,10 @@
 ﻿using RPR.ViewModel;
 using System;
+using System.Drawing;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace RPR
 {
@@ -53,6 +56,16 @@ namespace RPR
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             Coords.Content = "Mouse position: " + e.GetPosition(MainView) + " CameraPosition: " + game.Camera.Position;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuButton_MouseEnter(object sender, MouseEventArgs e)
+        {
+            ((Button)sender).Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255,255,255,255));
         }
     }
 }

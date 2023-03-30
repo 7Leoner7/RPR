@@ -6,10 +6,18 @@
         xmlns:local="clr-namespace:RPR"
         mc:Ignorable="d"
         Title="RPR" Height="450" Width="800" Loaded="Window_Loaded" MouseMove="Window_MouseMove" MinWidth="600" MinHeight="450" WindowState="Maximized">
+    <Window.Resources>
+        <ControlTemplate x:Key="ButtonTemplate1" TargetType="{x:Type Button}">
+            <Grid/>
+        </ControlTemplate>
+    </Window.Resources>
     <Grid>
         <Canvas x:Name="MainView" Margin="0,0,0,40" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave">
             <local:TestShape x:Name="TestF" Width="150" Height="150" StrokeThickness="2" Stroke="White" Canvas.Left="4" Canvas.Top="9"/>
         </Canvas>
-        <Label x:Name="Coords" Content="Label" BorderBrush="Black" Foreground="#FFFBFBFB" Background="Black" Height="41" VerticalAlignment="Bottom"/>
+        <Grid>
+            <Label x:Name="Coords" Content="Label" BorderBrush="White" BorderThickness="2" Foreground="#FFFBFBFB" Background="Black" Height="40" VerticalAlignment="Bottom"/>
+            <Button Style="{DynamicResource DefaultButtonStyle}" Content="&lt;" Margin="0,144,0,0" HorizontalAlignment="Right" Width="20" Height="70" VerticalAlignment="Top" Background="#50FFFFFF" Foreground="White" BorderBrush="#50FFFFFF"/>
+        </Grid>
     </Grid>
 </Window>
