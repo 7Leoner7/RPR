@@ -1,5 +1,4 @@
 ﻿using RPR.Model;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -51,12 +50,12 @@ namespace RPR.View
         {
             var dist = 10;
 
-            var Top = Camera.Position.Y; 
+            var Top = Camera.Position.Y;
 
             if ((Top > Camera.HeightProjection / 2 - dist))
                 Top = Camera.HeightProjection / 2 - dist;
-            if ((Top < - Camera.HeightProjection / 2 + dist))
-                Top = - Camera.HeightProjection / 2 + dist;
+            if ((Top < -Camera.HeightProjection / 2 + dist))
+                Top = -Camera.HeightProjection / 2 + dist;
 
             X.Margin = new Thickness()
             {

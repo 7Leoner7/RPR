@@ -55,7 +55,12 @@ namespace RPR
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
-            Coords.Content = "Mouse position: " + e.GetPosition(MainView) + " CameraPosition: " + game.Camera.Position;
+            var res = game.GetPointMouseInWordl(e.GetPosition(MainView));
+            res.X /= game.Camera.Rate_Size;
+            res.Y /= game.Camera.Rate_Size;
+            res.X = Math.Round(res.X, 2);
+            res.Y = Math.Round(res.Y, 2);
+            Coords.Content = "Mouse position: " + res + " CameraPosition: " + game.Camera.WorldPosition;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

@@ -16,14 +16,14 @@ namespace RPR.Model
 
         abstract public void DeInit();
 
-        abstract public void Update(UIElement element);
+        abstract public void Update(FrameworkElement element);
 
-        abstract public void Delete(UIElement element);
+        abstract public void Delete(FrameworkElement element);
 
         abstract public void Delete(int elemID);
 
         abstract public void DeleteAll();
 
-        abstract public void UpdateAll(List<UIElement> element);
+        abstract public void UpdateAll(List<FrameworkElement> element);
     }
 }

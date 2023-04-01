@@ -15,6 +15,7 @@ namespace RPR.ViewModel
         protected bool MoveCamera { get; set; }
         public Coords Coords { get; protected set; }
         public int FrameSpeed { get; set; }
+        public double WheelDelay { get; set; }
 
         public GameView(ref Canvas view)
         {
@@ -25,6 +26,7 @@ namespace RPR.ViewModel
             MoveCamera = false;
 
             FrameSpeed = 1000 / 144;
+            WheelDelay = 2.0 / 1;
 
             Camera = new Camera();
             Camera.OnUpdatePosition += Camera_OnUpdatePosition;
@@ -32,17 +34,15 @@ namespace RPR.ViewModel
             Camera.OnUpdateRateSize += Camera_OnUpdateRateSize;
             Camera.UpdateRateSize(1);
             Camera.UpdateProjections(View.ActualWidth / Camera.Rate_Size, View.ActualHeight / Camera.Rate_Size);
-            Camera.PositionRelativeCanvas = new Point(View.ActualWidth / 2, View.ActualHeight / 2);
         }
 
         private void View_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            Camera.UpdateRateSize(Camera.Rate_Size / (e.Delta < 0 ? 15.0 / 10 : 10.0 / 15));
+            Camera.UpdateRateSize(Camera.Rate_Size / (e.Delta < 0 ? WheelDelay : 1 / WheelDelay));
         }
 
         private void View_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Camera.PositionRelativeCanvas = new Point(View.ActualWidth / 2, View.ActualHeight / 2);
             var rate = Math.Sqrt(e.NewSize.Width + e.NewSize.Height) / Math.Sqrt(e.PreviousSize.Width + e.PreviousSize.Height);
             Camera.UpdateRateSize(Camera.Rate_Size * rate);
             Camera.UpdateProjections(View.ActualWidth, View.ActualHeight);
@@ -64,9 +64,6 @@ namespace RPR.ViewModel
                     MoveCamera = true;
                     Vector vector = (Vector)(new_p - old_p);
                     vector.X *= -1;
-                    //Ограничение скорости
-                    //vector.X = Math.Abs(vector.X) > 10 ? (vector.X > 0 ? 10 : -10): vector.X;
-                    //vector.Y = Math.Abs(vector.Y) > 10 ? (vector.Y > 0 ? 10 : -10) : vector.Y;
 
                     Camera.UpdatePosition(vector);
                     old_p = new_p;
@@ -83,19 +80,22 @@ namespace RPR.ViewModel
 
         private void Camera_OnUpdateRateSize(Camera camera, EventArgsCamera e)
         {
-            foreach (Shape child in this.View.Children)
+            foreach (FrameworkElement child in this.View.Children)
             {
+                if (!(child is Shape)) continue;
                 if (child is TestShape) continue;
                 child.Width = child.Width * e.RateSize.Y / e.RateSize.X > 0 ? child.Width * e.RateSize.Y / e.RateSize.X : child.Width;
                 child.Height = child.Height * e.RateSize.Y / e.RateSize.X > 0 ? child.Height * e.RateSize.Y / e.RateSize.X : child.Height;
             }
+            Coords?.Update(e);
         }
 
         private void Camera_OnUpdateProjection(Camera camera, EventArgsCamera e)
         {
             Coords?.Init();
-            foreach (Shape child in this.View.Children)
+            foreach (FrameworkElement child in this.View.Children)
             {
+                if (!(child is Shape)) continue;
                 if (child.Tag != null) continue;
                 if (child is TestShape) continue;
                 child.Margin = new Thickness(child.Margin.Left * (e.Width.Y / e.Width.X), child.Margin.Top * (e.Height.Y / e.Height.X), child.Margin.Right, child.Margin.Bottom);
@@ -104,8 +104,9 @@ namespace RPR.ViewModel
 
         private void Camera_OnUpdatePosition(Camera camera, EventArgsCamera e)
         {
-            foreach (Shape child in this.View.Children)
+            foreach (FrameworkElement child in this.View.Children)
             {
+                if (!(child is Shape)) continue;
                 if (child.Tag != "View_Shape") continue;
                 child.Margin = new Thickness()
                 {
@@ -115,7 +116,7 @@ namespace RPR.ViewModel
                     Top = child.Margin.Top + e.Velocity.Y
                 };
             }
-            Coords.Update(e);
+            Coords?.Update(e);
         }
 
         private void InitCoords()
@@ -167,10 +168,10 @@ namespace RPR.ViewModel
             trail.Fill = new SolidColorBrush(Color.FromScRgb(0.15f, 255, 255, 255));
             trail.Width = 100;
             trail.Height = 100;
-
+         
             Update(trail);
-            Update(ellipse);
-            
+            Update(test.Shape);
+              
             IsInitialized = true;
             //InitLoop
             for (; IsInitialized;)
@@ -197,14 +198,6 @@ namespace RPR.ViewModel
 
                 test.PossitionRelativeView += vec;
 
-                //ellipse.Margin = new Thickness()
-                //{
-                //    Right = 0,
-                //    Bottom = 0,
-                //    Left = ellipse.Margin.Left + vec.X,
-                //    Top = ellipse.Margin.Top + vec.Y,
-                //};
-
                 await Task.Delay(FrameSpeed);
             }
         }
@@ -221,7 +214,7 @@ namespace RPR.ViewModel
             this.IsInitialized = false;
         }
 
-        public override void Update(UIElement element)
+        public override void Update(FrameworkElement element)
         {
             if (View.Children.Contains(element))
             {
@@ -231,13 +224,23 @@ namespace RPR.ViewModel
             else View.Children.Add(element);
         }
 
-        public override void UpdateAll(List<UIElement> elements)
+        public override void UpdateAll(List<FrameworkElement> elements)
         {
-            foreach (UIElement element in elements)
+            foreach (FrameworkElement element in elements)
                 Update(element);
         }
 
-        public override void Delete(UIElement element)
+        public void Update(Control element)
+        {
+            if (View.Children.Contains(element))
+            {
+                View.Children.Remove(element);
+                View.Children.Add(element);
+            }
+            else View.Children.Add(element);
+        }
+
+        public override void Delete(FrameworkElement element)
         {
             if (View.Children.Contains(element))
                 View.Children.Remove(element);
@@ -252,6 +255,14 @@ namespace RPR.ViewModel
         public override void DeleteAll()
         {
             View.Children.Clear();
+        }
+
+        public Point GetPointMouseInWordl(Point point_rel_canvas)
+        {
+            var vector = point_rel_canvas - Camera.PositionRelativeCanvas;
+            vector.Y *= -1;
+            var result = Camera.Position + vector;
+            return result;
         }
     }
 }
