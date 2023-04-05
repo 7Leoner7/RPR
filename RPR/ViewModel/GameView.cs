@@ -1,4 +1,5 @@
 ﻿using RPR.Model;
+using RPR.Shapes;
 using RPR.View;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,9 @@ namespace RPR.ViewModel
         public Coords Coords { get; protected set; }
         public int FrameSpeed { get; set; }
         public double WheelDelay { get; set; }
+        public ManagerShapes ManagerShapes { get; init; }
 
-        public GameView(ref Canvas view)
+        public GameView(ref Canvas view, string? WorldName = null)
         {
             View = view;
             View.MouseMove += View_MouseMove;
@@ -26,7 +28,7 @@ namespace RPR.ViewModel
             MoveCamera = false;
 
             FrameSpeed = 1000 / 144;
-            WheelDelay = 2.0 / 1;
+            WheelDelay = 2.0;
 
             Camera = new Camera();
             Camera.OnUpdatePosition += Camera_OnUpdatePosition;
@@ -34,6 +36,8 @@ namespace RPR.ViewModel
             Camera.OnUpdateRateSize += Camera_OnUpdateRateSize;
             Camera.UpdateRateSize(1);
             Camera.UpdateProjections(View.ActualWidth / Camera.Rate_Size, View.ActualHeight / Camera.Rate_Size);
+
+            ManagerShapes= new ManagerShapes(WorldName);
         }
 
         private void View_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
@@ -78,12 +82,19 @@ namespace RPR.ViewModel
             }
         }
 
+        protected bool IsInException(FrameworkElement element)
+        {
+            if (!(element is Shape)) return true;
+            if (element is TestShape) return true;
+            if (!element.Tag.Equals("View_Shape")) return true;
+            return false;
+        }
+
         private void Camera_OnUpdateRateSize(Camera camera, EventArgsCamera e)
         {
             foreach (FrameworkElement child in this.View.Children)
             {
-                if (!(child is Shape)) continue;
-                if (child is TestShape) continue;
+                if (IsInException(child)) continue;
                 child.Width = child.Width * e.RateSize.Y / e.RateSize.X > 0 ? child.Width * e.RateSize.Y / e.RateSize.X : child.Width;
                 child.Height = child.Height * e.RateSize.Y / e.RateSize.X > 0 ? child.Height * e.RateSize.Y / e.RateSize.X : child.Height;
             }
@@ -95,9 +106,7 @@ namespace RPR.ViewModel
             Coords?.Init();
             foreach (FrameworkElement child in this.View.Children)
             {
-                if (!(child is Shape)) continue;
-                if (child.Tag != null) continue;
-                if (child is TestShape) continue;
+                if (IsInException(child)) continue;
                 child.Margin = new Thickness(child.Margin.Left * (e.Width.Y / e.Width.X), child.Margin.Top * (e.Height.Y / e.Height.X), child.Margin.Right, child.Margin.Bottom);
             }
         }
@@ -106,8 +115,7 @@ namespace RPR.ViewModel
         {
             foreach (FrameworkElement child in this.View.Children)
             {
-                if (!(child is Shape)) continue;
-                if (child.Tag != "View_Shape") continue;
+                if (IsInException(child)) continue;
                 child.Margin = new Thickness()
                 {
                     Bottom = 0,
@@ -137,76 +145,15 @@ namespace RPR.ViewModel
             InitCoords();
 
             //InitElements
-            var rand = new Random();
-            var Width = 100;
-            var Height = 100;
-            var vec = new Vector(0.4, 0.5);
-            var speed = 5 * 7;
-            vec.X *= speed;
-            vec.Y *= speed;
-            var ellipse = new Ellipse()
-            {
-                Width = Width,
-                Height = Height,
-                Fill = new SolidColorBrush(Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))),
-                Margin = new Thickness()
-                {
-                    Bottom = 0,
-                    Left = rand.Next(Width, (int)View.ActualWidth - Width),
-                    Right = 0,
-                    Top = rand.Next(Height, (int)View.ActualHeight - Height)
-                },
-            };
-            ellipse.MouseDown += Ellipse_MouseDown;
-            ellipse.Tag = "View_Shape";
-
-            var test = new SmartShape<Ellipse>(ellipse);
-
-            Ellipse trail = new Ellipse();
-
-            trail.StrokeThickness = 5;
-            trail.Fill = new SolidColorBrush(Color.FromScRgb(0.15f, 255, 255, 255));
-            trail.Width = 100;
-            trail.Height = 100;
-         
-            Update(trail);
-            Update(test.Shape);
-              
+            Update();
+            
             IsInitialized = true;
             //InitLoop
             for (; IsInitialized;)
             {
-                if ((ellipse.Margin.Top + vec.Y + ellipse.ActualHeight > View.ActualHeight) || (ellipse.Margin.Top + vec.Y <= 0))
-                {
-                    vec.Y *= -1;
-                }
-
-                if ((ellipse.Margin.Left + vec.X + ellipse.ActualWidth > View.ActualWidth) || (ellipse.Margin.Left + vec.X <= 0))
-                {
-                    vec.X *= -1;
-                }
-
-                if ((View.ActualHeight <= 0) || (View.ActualWidth <= 0)) continue;
-
-                trail.Margin = new Thickness()
-                {
-                    Right = 0,
-                    Bottom = 0,
-                    Left = ellipse.Margin.Left - vec.X,
-                    Top = ellipse.Margin.Top - vec.Y,
-                };
-
-                test.PossitionRelativeView += vec;
-
+                ManagerShapes.ShapesFollowTheRules();
                 await Task.Delay(FrameSpeed);
             }
-        }
-
-        private void Ellipse_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            var shape = (Shape)sender;
-            var rand = new Random();
-            shape.Fill = new SolidColorBrush(Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));
         }
 
         public override void DeInit()
@@ -230,14 +177,13 @@ namespace RPR.ViewModel
                 Update(element);
         }
 
-        public void Update(Control element)
+        /// <summary>
+        /// Update from ManagerShapes
+        /// </summary>
+        protected void Update()
         {
-            if (View.Children.Contains(element))
-            {
-                View.Children.Remove(element);
-                View.Children.Add(element);
-            }
-            else View.Children.Add(element);
+            foreach (var elem in ManagerShapes.World.SmartShapes)
+                Update(elem.GetShape());
         }
 
         public override void Delete(FrameworkElement element)
@@ -264,5 +210,8 @@ namespace RPR.ViewModel
             var result = Camera.Position + vector;
             return result;
         }
+
+        public void Save() =>
+            ManagerShapes.Serialize();
     }
 }
