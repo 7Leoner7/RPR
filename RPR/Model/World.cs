@@ -33,7 +33,7 @@ namespace RPR.Model
 
         public WorldArgs MetaData { get; set; }
 
-        public List<IRule> Rules { get; set; }
+        public List<Rule> Rules { get; set; }
 
         public bool IsFollowInnerRules { get; set; }
 
@@ -49,7 +49,7 @@ namespace RPR.Model
 
         public World()
         {
-            Rules = new List<IRule>();
+            Rules = new List<Rule>();
             MetaData = new WorldArgs() { Name = Guid.NewGuid().ToString() };
             MetaData.Time = DateTime.Now;
             SmartShapes = new List<SmartShape>();

@@ -151,7 +151,7 @@ public class Rule
             }
         }
 
-        public List<IRule> Rules { get; protected set; }
+        public List<Rule> Rules { get; protected set; }
 
         public bool IsFollowInnerRules { get; set; }
 
@@ -182,7 +182,7 @@ public class Rule
 
         protected void InitShape()
         {
-            IRule rule = new Rule();
+            Rule rule = new Rule();
 
             rule.TextRules.Add(@"var rand = new Random(); 
             args.Sender.Fill = new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));");
@@ -277,12 +277,12 @@ public class Rule
             return Rules[number_rule].Name;
         }
 
-        public void AddRule(IRule Rule)
+        public void AddRule(Rule Rule)
         {
             Rules.Add(Rule);
         }
 
-        public void UpdateRule(IRule Rule, int Position_Rule)
+        public void UpdateRule(Rule Rule, int Position_Rule)
         {
             if (Rules.Count < Position_Rule)
             {
@@ -296,14 +296,14 @@ public class Rule
             Rules.RemoveAt(Position_Rule);
         }
 
-        public void DeleteRule(IRule Rule)
+        public void DeleteRule(Rule Rule)
         {
             Rules.Remove(Rule);
         }
 
         public SmartShape(Shape base_shape)
         {
-            Rules = new List<IRule>();
+            Rules = new List<Rule>();
             Shape = base_shape;
             ID = Guid.NewGuid();
             Serialize();
@@ -330,7 +330,7 @@ public class Rule
         /// </summary>
         public SmartShape()
         {
-            Rules = new List<IRule>();
+            Rules = new List<Rule>();
             Shape = new AnyShape();
         }
 
