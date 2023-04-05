@@ -37,7 +37,7 @@ namespace RPR.ViewModel
             Camera.UpdateRateSize(1);
             Camera.UpdateProjections(View.ActualWidth / Camera.Rate_Size, View.ActualHeight / Camera.Rate_Size);
 
-            ManagerShapes= new ManagerShapes(WorldName);
+            ManagerShapes = new ManagerShapes(WorldName);
         }
 
         private void View_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)

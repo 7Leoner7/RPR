@@ -9,11 +9,9 @@ using System.Windows.Shapes;
 
 namespace RPR.Model
 {
-    public interface IWorld
+    public interface IWorld : IRuleable
     {
         public List<SmartShape> SmartShapes { get; set; }
-
-        public List<Action<WorldArgs>> Rules { get; set; }
 
         public WorldArgs MetaData { get; set; }
     }
@@ -33,9 +31,13 @@ namespace RPR.Model
     {
         public List<SmartShape> SmartShapes { get; set; }
 
-        public List<Action<WorldArgs>> Rules { get; set; }
-
         public WorldArgs MetaData { get; set; }
+
+        public List<IRule> Rules { get; set; }
+
+        public bool IsFollowInnerRules { get; set; }
+
+        public bool IsFollowOuterRules { get; set; }
 
         public void DeserializeShapes()
         {
@@ -47,7 +49,7 @@ namespace RPR.Model
 
         public World()
         {
-            Rules = new List<Action<WorldArgs>>();
+            Rules = new List<IRule>();
             MetaData = new WorldArgs() { Name = Guid.NewGuid().ToString() };
             MetaData.Time = DateTime.Now;
             SmartShapes = new List<SmartShape>();

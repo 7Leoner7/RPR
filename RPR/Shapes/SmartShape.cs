@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -33,8 +32,6 @@ namespace RPR.Shapes
 
         public Point Possition { get; set; }
 
-        public List<string> TextRules { get; }
-
         public Geometry Geometry { get; }
     }
 
@@ -43,7 +40,7 @@ namespace RPR.Shapes
         public Vector Velocity { get; set; }
     }
 
-    public class SmartShape : ISmartShape, IMoveable
+    public class SmartShape : ISmartShape, IMoveable, IRuleable
     {
         protected string assemblyPath = Directory.GetCurrentDirectory() + "\\Rules";
 
@@ -71,8 +68,6 @@ public class Rule
 
         protected Shape Shape { get; set; }
 
-        protected List<Action<ArgsSmartShapes>> Rules { get; set; }
-
         public Guid ID { get; init; }
 
         public Vector Velocity { get; set; }
@@ -95,11 +90,7 @@ public class Rule
                 Shape.RenderedGeometry.GetWidenedPathGeometry(new Pen());
         }
 
-        public List<string> TextRules
-        {
-            get;
-            set;
-        }
+
 
         public Brush Fill
         {
@@ -160,11 +151,14 @@ public class Rule
             }
         }
 
+        public List<IRule> Rules { get; protected set; }
+
+        public bool IsFollowInnerRules { get; set; }
+
+        public bool IsFollowOuterRules { get; set; }
+
         public Shape GetShape() =>
             Shape;
-
-        public List<Action<ArgsSmartShapes>> GetRules() =>
-            Rules;
 
         public ISmartShape GetInterface() =>
             this;
@@ -188,17 +182,21 @@ public class Rule
 
         protected void InitShape()
         {
-            AddRules(@"var rand = new Random(); 
+            IRule rule = new Rule();
+
+            rule.TextRules.Add(@"var rand = new Random(); 
             args.Sender.Fill = new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));");
-            AddRules("args.Sender.Possition = new Point(args.Sender.Possition.X + 1, args.Sender.Possition.Y + 1);");
+            rule.TextRules.Add("args.Sender.Possition = new Point(args.Sender.Possition.X + rand.Next(-1,1), args.Sender.Possition.Y + rand.Next(-1,1));");
+
+            Rules.Add(rule);
+
             DirectoryInfo info = new DirectoryInfo(assemblyPath);
             if (!info.Exists)
                 Directory.CreateDirectory(info.FullName);
-            if (!SetRules(assemblyPath + "\\" + ID + ".dll"))
-                CompileRules();
+            CompileAllRules();
         }
 
-        public bool SetRules(string assemblyPath)
+        public bool CreateRulesOfAssembly(string assemblyPath, int num_rule)
         {
             try
             {
@@ -208,7 +206,7 @@ public class Rule
                 Action<ArgsSmartShapes> action = (Action<ArgsSmartShapes>)Delegate.CreateDelegate(typeof(Action<ArgsSmartShapes>),
                     assembly.GetType("Rule").GetMethod("Main", BindingFlags.Static | BindingFlags.Public | BindingFlags.InvokeMethod));
 
-                Rules.Add(action);
+                Rules[num_rule].Instruction = action;
                 return true;
             }
             catch
@@ -217,12 +215,27 @@ public class Rule
             }
         }
 
-        public void CompileRules()
+        public void CompileAllRules()
         {
-            if (TextRules.Count == 0) return;
+            for (int i = 0; i < Rules.Count; i++)
+            {
+                CreateRulesOfAssembly(assemblyPath + "\\" + CompileRule(i) + ".dll", i);
+            }
+        }
+
+        /// <summary>
+        /// При удачной компиляции возвращает имя IRule
+        /// </summary>
+        /// <param name="number_rule"></param>
+        /// <returns></returns>
+        public string? CompileRule(int number_rule)
+        {
+            if (Rules.Count == 0) return null;
+
+            var textRules = string.Join(null, Rules[number_rule].TextRules);
 
             CSharpParseOptions option = new CSharpParseOptions(LanguageVersion.CSharp8, preprocessorSymbols: new List<string>() { "Debug" }); // Определяем версию C # и объем переданной прекомпиляции
-            var tree = CSharpSyntaxTree.ParseText(_sourceCode.Replace("!", string.Join(null, TextRules)), option);
+            var tree = CSharpSyntaxTree.ParseText(_sourceCode.Replace("!", textRules), option);
             Debug.Assert(tree.GetDiagnostics().ToList().Count == 0);
 
             var compileOption = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
@@ -235,7 +248,9 @@ public class Rule
             var t = tree.GetDiagnostics().ToList().Count;
             Debug.Assert(t == 0); // Если раньше была пропущенная ссылка или неправильный метод вызова, это будет отражено здесь
 
-            var assemblyPath = this.assemblyPath + "\\" + ID + ".dll";
+            Rules[number_rule].Name = Rules[number_rule].Name ?? Guid.NewGuid().ToString();
+
+            var assemblyPath = this.assemblyPath + "\\" + Rules[number_rule].Name + ".dll";
             //var pdbPath = @"C:\Roslyn\class1.pdb";
 
             MetadataReference[] metaDatareferences = {
@@ -257,22 +272,39 @@ public class Rule
                 {
                     message += item.ToString() + "\n";
                 }
-                throw new Exception(message);
+                return null;
             }
-
-            SetRules(assemblyPath);
+            return Rules[number_rule].Name;
         }
 
-        public void AddRules(string Rule)
+        public void AddRule(IRule Rule)
         {
-            TextRules.Add(Rule);
+            Rules.Add(Rule);
+        }
+
+        public void UpdateRule(IRule Rule, int Position_Rule)
+        {
+            if (Rules.Count < Position_Rule)
+            {
+                Rules.RemoveAt(Position_Rule);
+                Rules.Add(Rule);
+            }
+        }
+
+        public void DeleteRule(int Position_Rule)
+        {
+            Rules.RemoveAt(Position_Rule);
+        }
+
+        public void DeleteRule(IRule Rule)
+        {
+            Rules.Remove(Rule);
         }
 
         public SmartShape(Shape base_shape)
         {
-            Rules = new List<Action<ArgsSmartShapes>>();
+            Rules = new List<IRule>();
             Shape = base_shape;
-            TextRules = new List<string>();
             ID = Guid.NewGuid();
             Serialize();
             InitShape();
@@ -281,7 +313,7 @@ public class Rule
         public SmartShape(SmartShape smartShape)
         {
             Shape = smartShape.GetShape();
-            TextRules = smartShape.TextRules;
+            Rules = smartShape.Rules;
             ID = smartShape.ID;
             Fill = smartShape.Fill;
             Data = smartShape.Data;
@@ -294,18 +326,18 @@ public class Rule
         }
 
         /// <summary>
-        /// Non-init
+        /// Not-init and Not-Serialized
         /// </summary>
         public SmartShape()
         {
-            Rules = new List<Action<ArgsSmartShapes>>();
-            TextRules = new List<string>();
+            Rules = new List<IRule>();
             Shape = new AnyShape();
         }
 
         public void InitShape(Shape new_shape)
         {
-            Shape = new_shape;
+            if (Shape == null)
+                Shape = new_shape;
         }
 
         public void Serialize()

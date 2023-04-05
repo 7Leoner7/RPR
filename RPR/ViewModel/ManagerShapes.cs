@@ -19,6 +19,8 @@ namespace RPR.ViewModel
         {
             for (int i = 0; i < World.SmartShapes.Count; i++)
             {
+                if (World.SmartShapes[i].IsFollowInnerRules == true) continue;
+
                 var args = new ArgsSmartShapes() { Called_Shape = null, Sender = World.SmartShapes[i], Bound_Collision = false, Inner_Collision = false };
 
                 for (int j = i + 1; j < World.SmartShapes.Count; j++)
@@ -34,8 +36,8 @@ namespace RPR.ViewModel
                     }
                 }
 
-                foreach (var act in World.SmartShapes[i].GetRules())
-                    act.Invoke(args);
+                foreach (var act in World.SmartShapes[i].Rules)
+                    act.Instruction.Invoke(args);
             }
         }
 
