@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace RPR.Model
 {
-    public interface Rule
+    public interface IRule
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -21,7 +21,7 @@ namespace RPR.Model
         public bool IsFollowOuterRules { get; set; }
     }
 
-    public class Rule : Rule
+    public class Rule : IRule
     {
         public string Name { get; set; }
         public string Description { get; set; }
