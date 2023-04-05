@@ -37,7 +37,7 @@ namespace RPR.ViewModel
                 }
 
                 foreach (var act in World.SmartShapes[i].Rules)
-                    act.Instruction.Invoke(args);
+                    act.GetInstruction().Invoke(args);
             }
         }
 

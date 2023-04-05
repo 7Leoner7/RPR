@@ -182,13 +182,13 @@ public class Rule
 
         protected void InitShape()
         {
-            Rule rule = new Rule();
+            //Rule rule = new Rule();
 
-            rule.TextRules.Add(@"var rand = new Random(); 
-            args.Sender.Fill = new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));");
-            rule.TextRules.Add("args.Sender.Possition = new Point(args.Sender.Possition.X + rand.Next(-1,1), args.Sender.Possition.Y + rand.Next(-1,1));");
+            //rule.TextRules.Add(@"var rand = new Random(); 
+            //args.Sender.Fill = new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));");
+            //rule.TextRules.Add("args.Sender.Possition = new Point(args.Sender.Possition.X + rand.Next(-1,1), args.Sender.Possition.Y + rand.Next(-1,1));");
 
-            Rules.Add(rule);
+            //Rules.Add(rule);
 
             DirectoryInfo info = new DirectoryInfo(assemblyPath);
             if (!info.Exists)
@@ -206,7 +206,7 @@ public class Rule
                 Action<ArgsSmartShapes> action = (Action<ArgsSmartShapes>)Delegate.CreateDelegate(typeof(Action<ArgsSmartShapes>),
                     assembly.GetType("Rule").GetMethod("Main", BindingFlags.Static | BindingFlags.Public | BindingFlags.InvokeMethod));
 
-                Rules[num_rule].Instruction = action;
+                Rules[num_rule].SetInstrution(action);
                 return true;
             }
             catch

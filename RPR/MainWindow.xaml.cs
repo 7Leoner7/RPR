@@ -43,40 +43,40 @@ namespace RPR
         {
             game = new GameView(ref MainView, "World0");
 
-            var rand = new Random();
-            var Width = 100;
-            var Height = 100;
-            var vec = new Vector(0.4, 0.5);
-            var speed = 5 * 7;
-            vec.X *= speed;
-            vec.Y *= speed;
+            //var rand = new Random();
+            //var Width = 100;
+            //var Height = 100;
+            //var vec = new Vector(0.4, 0.5);
+            //var speed = 5 * 7;
+            //vec.X *= speed;
+            //vec.Y *= speed;
 
-            var ellipse = new SmartShape(new Ellipse()
-            {
-                Width = Width,
-                Height = Height,
-                Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))),
-                Margin = new Thickness()
-                {
-                    Bottom = 0,
-                    Left = rand.Next(Width, (int)game.View.ActualWidth - Width),
-                    Right = 0,
-                    Top = rand.Next(Height, (int)game.View.ActualHeight - Height)
-                },
-            });
-            ellipse.Tag = "View_Shape";
+            //var ellipse = new SmartShape(new Ellipse()
+            //{
+            //    Width = Width,
+            //    Height = Height,
+            //    Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))),
+            //    Margin = new Thickness()
+            //    {
+            //        Bottom = 0,
+            //        Left = rand.Next(Width, (int)game.View.ActualWidth - Width),
+            //        Right = 0,
+            //        Top = rand.Next(Height, (int)game.View.ActualHeight - Height)
+            //    },
+            //});
+            //ellipse.Tag = "View_Shape";
 
-            var trail = new SmartShape(new Ellipse());
+            //var trail = new SmartShape(new Ellipse());
 
-            trail.StrokeThickness = 5;
-            trail.Fill = new SolidColorBrush(System.Windows.Media.Color.FromScRgb(0.99f, 255, 255, 255));
-            trail.Width = 100;
-            trail.Height = 100;
-            trail.Tag = "View_Shape";
-            trail.Possition = new System.Windows.Point(ellipse.Possition.X - vec.X, ellipse.Possition.Y - vec.Y);
+            //trail.StrokeThickness = 5;
+            //trail.Fill = new SolidColorBrush(System.Windows.Media.Color.FromScRgb(0.99f, 255, 255, 255));
+            //trail.Width = 100;
+            //trail.Height = 100;
+            //trail.Tag = "View_Shape";
+            //trail.Possition = new System.Windows.Point(ellipse.Possition.X - vec.X, ellipse.Possition.Y - vec.Y);
 
-            game.ManagerShapes.Add(trail);
-            game.ManagerShapes.Add(ellipse);
+            //game.ManagerShapes.Add(trail);
+            //game.ManagerShapes.Add(ellipse);
 
             MainView.Dispatcher.InvokeAsync(() =>
                game.Init());
