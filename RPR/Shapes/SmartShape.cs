@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Media;
@@ -20,19 +21,27 @@ namespace RPR.Shapes
     {
         public Guid ID { get; init; }
 
-        public Brush Fill { get; set; }
+        public Geometry GetGeometry();
 
-        public double Width { get; set; }
+        public Brush GetFill();
+        public void SetFill(Brush brush);
 
-        public double Height { get; set; }
+        public double GetWidth();
+        public void SetWidth(double width);
 
-        public Brush Stroke { get; set; }
+        public double GetHeight();
+        public void SetHeight(double height);
 
-        public double StrokeThickness { get; set; }
+        public Brush GetStroke();
+        public void SetStroke(Brush brush);
+
+        public double GetStrokeThickness();
+        public void SetStrokeThickness(double thickness);
+
+        public object GetTag();
+        public void SetTag(object tag);
 
         public Point Possition { get; set; }
-
-        public Geometry Geometry { get; }
     }
 
     public interface IMoveable
@@ -68,14 +77,23 @@ public class Rule
 
         protected Shape Shape { get; set; }
 
+        protected string _xmlShape;
+
         public Guid ID { get; init; }
 
         public Vector Velocity { get; set; }
 
+        public Matrix Matrix { get; set; }
+
         public string XmlShape
         {
-            get;
-            set;
+            get =>
+                XamlWriter.Save(Shape);
+            set {
+                _xmlShape = value;
+                InitShapeFromXml();
+            }
+                
         }
 
         public JObject? Data
@@ -84,51 +102,25 @@ public class Rule
             set;
         }
 
-        public Geometry Geometry
-        {
-            get =>
-                Shape.RenderedGeometry.GetWidenedPathGeometry(new Pen());
-        }
+        public Geometry GetGeometry() => Shape.RenderedGeometry.GetWidenedPathGeometry(new Pen());
 
+        public Brush GetFill() => Shape.Fill;
+        public void SetFill(Brush brush) => Shape.Fill = brush;
 
+        public double GetWidth() => Shape.Width;
+        public void SetWidth(double width) => Shape.Width = width;
 
-        public Brush Fill
-        {
-            get => Shape.Fill;
-            set => Shape.Fill = value;
-        }
+        public double GetHeight() => Shape.Height;
+        public void SetHeight(double height) => Shape.Height = height;
 
-        public double Width
-        {
-            get => Shape.Width;
-            set => Shape.Width = value;
-        }
+        public Brush GetStroke() => Shape.Stroke;
+        public void SetStroke(Brush brush) => Shape.Stroke = brush;
 
-        public double Height
-        {
-            get => Shape.Height;
-            set => Shape.Height = value;
-        }
-
-        public Brush Stroke
-        {
-            get => Shape.Stroke;
-            set => Shape.Stroke = value;
-        }
-
-        public double StrokeThickness
-        {
-            get => Shape.StrokeThickness;
-            set => Shape.StrokeThickness = value;
-        }
-
-        public object Tag
-        {
-            get =>
-                Shape.Tag;
-            set =>
-                Shape.Tag = value;
-        }
+        public double GetStrokeThickness() => Shape.StrokeThickness;
+        public void SetStrokeThickness(double thickness) => Shape.StrokeThickness = thickness;
+        
+        public object GetTag() => Shape.Tag;
+        public void SetTag(object tag) => Shape.Tag = tag;
 
         /// <summary>
         /// Possition relative center of shape bounds
@@ -163,14 +155,29 @@ public class Rule
         public ISmartShape GetInterface() =>
             this;
 
-        public bool IsCollisionBounds(Shape sender)
+        protected bool ChisloInRage(double start, double end, double chislo)
         {
-            if (Shape.RenderedGeometry == null) return false;
-            if (sender.RenderedGeometry == null) return false;
-            return Shape.RenderedGeometry.Bounds.IntersectsWith(sender.RenderedGeometry.Bounds);
+            return (start <= chislo) && (end >= chislo);
         }
 
-        public bool FindCollissionBetweenShapes(SmartShape caller)
+        public bool IsCollisionBounds(SmartShape sender)
+        {
+            if (Shape.RenderedGeometry == null) return false;
+            if (sender.GetShape().RenderedGeometry == null) return false;
+
+            var ThisPointB = new Point(Possition.X - Shape.Width / 2, Possition.Y - Shape.Height / 2);
+            var SenderPointB = new Point(sender.Possition.X - sender.Shape.Width / 2, sender.Possition.Y - sender.Shape.Height / 2);
+
+            var ThisPointE = new Vector(Shape.Width, Shape.Height) + ThisPointB;
+            var SenderPointE = new Vector(sender.Shape.Width, sender.Shape.Height) + SenderPointB;
+
+            var collision = (ChisloInRage(ThisPointB.X, ThisPointE.X, SenderPointB.X) || ChisloInRage(ThisPointB.X, ThisPointE.X, SenderPointE.X)) &&
+                (ChisloInRage(ThisPointB.Y, ThisPointE.Y, SenderPointB.Y) || ChisloInRage(ThisPointB.Y, ThisPointE.Y, SenderPointE.Y));
+
+            return collision;
+        }
+
+        public bool FindCollissionBetweenShapes(SmartShape caller) //Non-implemented
         {
             var geometry_sender = Shape.RenderedGeometry.GetWidenedPathGeometry(new Pen()).Figures;
             var geometry_caller = caller.Shape.RenderedGeometry.GetWidenedPathGeometry(new Pen()).Figures;
@@ -180,16 +187,52 @@ public class Rule
             return false;
         }
 
+        public void StartFollowRulles()
+        {
+            if(Rules.Count== 0) return;
+
+            if (Rules[0].GetInstruction() == null) InitShape();
+            Shape.Dispatcher.Invoke(async () => {
+                while (true)
+                {
+                    if (ManagerShapes.ProcessIsStoped)
+                    {
+                        return;
+                    }
+                    if (World.TimeStoped) { 
+                        await Task.Delay(10); 
+                        continue; 
+                    }
+                    var args = ManagerShapes.GetArgsSmartShape(this);
+                    if (args == null) continue;
+                    Rules[0].GetInstruction()?.Invoke(args);
+                    await Task.Delay(1);
+                }
+            });
+        }
+
         protected void InitShape()
         {
-            //Rule rule = new Rule();
+            if (Rules.Count > 0)
+            {
+                CreateRulesOfAssembly(this.assemblyPath + "\\" + Rules[0].Name + ".dll", 0);
+                return;
+            }
+            //  return;
+            var CollisionRule = @"
+            if(args.Bound_Collision){
+                var vector = args.Sender.Possition - args.Called_Shape.Possition;
+                args.Sender.Possition += vector;
+                args.Called_Shape.Possition -= vector;
+                args.Sender.SetFill(new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))));
+                args.Sender.SetStroke(new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))));
+            }";
+            Rule rule = new Rule();
 
-            //rule.TextRules.Add(@"var rand = new Random(); 
-            //args.Sender.Fill = new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255)));");
-            //rule.TextRules.Add("args.Sender.Possition = new Point(args.Sender.Possition.X + rand.Next(-1,1), args.Sender.Possition.Y + rand.Next(-1,1));");
-
-            //Rules.Add(rule);
-
+            rule.TextRules.Add(@"var rand = new Random();");
+            rule.TextRules.Add("args.Sender.Possition = new Point(args.Sender.Possition.X + Math.Cos(args.WorldArgs.CurrentTime/100d), args.Sender.Possition.Y + Math.Sin(args.WorldArgs.CurrentTime/100d));");
+            rule.TextRules.Add(CollisionRule);
+            Rules.Add(rule);
             DirectoryInfo info = new DirectoryInfo(assemblyPath);
             if (!info.Exists)
                 Directory.CreateDirectory(info.FullName);
@@ -306,7 +349,6 @@ public class Rule
             Rules = new List<Rule>();
             Shape = base_shape;
             ID = Guid.NewGuid();
-            Serialize();
             InitShape();
         }
 
@@ -315,57 +357,32 @@ public class Rule
             Shape = smartShape.GetShape();
             Rules = smartShape.Rules;
             ID = smartShape.ID;
-            Fill = smartShape.Fill;
             Data = smartShape.Data;
-            Width = smartShape.Width;
-            Height = smartShape.Height;
-            Stroke = smartShape.Stroke;
-            StrokeThickness = smartShape.StrokeThickness;
             Possition = smartShape.Possition;
-            Serialize();
+            XmlShape = smartShape.XmlShape;
         }
 
-        /// <summary>
-        /// Not-init and Not-Serialized
-        /// </summary>
         public SmartShape()
         {
             Rules = new List<Rule>();
-            Shape = new AnyShape();
         }
 
-        public void InitShape(Shape new_shape)
+        public void ReInitShape(Shape new_shape)
         {
             if (Shape == null)
                 Shape = new_shape;
         }
 
-        public void Serialize()
+        protected void InitShapeFromXml()
         {
-            XmlShape = XamlWriter.Save(Shape);
-        }
-
-        public void Deserialize()
-        {
-            XmlReader xmlReader = XmlReader.Create(new StringReader(XmlShape));
-            var SaveShape = (Shape)XamlReader.Load(xmlReader);
-            Shape TempShape = Shape;
-
-            Shape = SaveShape;
-            Fill = TempShape.Fill;
-            Stroke = TempShape.Stroke;
-            StrokeThickness = TempShape.StrokeThickness;
-            Width = TempShape.Width;
-            Height = TempShape.Height;
-            Tag = TempShape.Tag;
-            Possition = new SmartShape(TempShape).Possition;
-
-            InitShape();
+            XmlReader reader = XmlReader.Create(new StringReader(_xmlShape));
+            Shape = (Shape)XamlReader.Load(reader);
         }
     }
 
     public class ArgsSmartShapes
     {
+        public WorldArgs WorldArgs { get; set; }
         public bool Bound_Collision { get; set; }
         public bool Inner_Collision { get; set; }
         public SmartShape? Called_Shape { get; set; }

@@ -29,7 +29,7 @@ namespace RPR.Model
 
         public Rule()
         {
-            TextRules= new List<string>();
+            TextRules = new List<string>();
         }
 
         public void SetInstrution(Action<ArgsSmartShapes> instruction) =>

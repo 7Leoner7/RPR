@@ -5,19 +5,78 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RPR"
         mc:Ignorable="d"
-        Title="RPR" Height="450" Width="800" Loaded="Window_Loaded" MouseMove="Window_MouseMove" MinWidth="600" MinHeight="450" WindowState="Maximized">
-    <Window.Resources>
-        <ControlTemplate x:Key="ButtonTemplate1" TargetType="{x:Type Button}">
-            <Grid/>
-        </ControlTemplate>
-    </Window.Resources>
+        Title="RPR" Height="1080" Width="1920" Loaded="Window_Loaded" MouseMove="Window_MouseMove" MinWidth="1200" MinHeight="750" WindowState="Maximized">
     <Grid>
-        <Canvas x:Name="MainView" Margin="0,0,0,40" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave">
-            <local:TestShape x:Name="TestF" Width="150" Height="150" StrokeThickness="2" Stroke="White" Canvas.Left="4" Canvas.Top="9"/>
+        <Canvas x:Name="MainView" Background="Black" Initialized="MainView_Initialized" MouseEnter="MainView_MouseEnter" MouseLeave="MainView_MouseLeave" Panel.ZIndex="500" MouseDown="MainView_MouseDown">
+
         </Canvas>
-        <Grid>
-            <Label x:Name="Coords" Content="Label" BorderBrush="White" BorderThickness="2" Foreground="#FFFBFBFB" Background="Black" Height="40" VerticalAlignment="Bottom"/>
-            <Button Style="{DynamicResource DefaultButtonStyle}" Content="&lt;" Margin="0,144,0,0" HorizontalAlignment="Right" Width="20" Height="70" VerticalAlignment="Top" Background="#50FFFFFF" Foreground="White" BorderBrush="#50FFFFFF"/>
+        <Canvas x:Name="StartMenu" Height="1064" Width="1920" Panel.ZIndex="1200">
+            <Grid Height="1064" Width="1920" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="RPRLab" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="36" FontFamily="Comic Sans MS"></Label>
+                <Expander Grid.Row="1" Grid.Column="0" Header="Создать новый мир" VerticalAlignment="Top" HorizontalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Название мира:" FontFamily="Comic Sans MS" FontSize="16"></Label>
+                            <TextBox x:Name="WorldName" Width="205" FontFamily="Comic Sans MS" FontSize="16" ></TextBox>
+                        </StackPanel>
+                        <Separator/>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Описание мира:" FontFamily="Comic Sans MS" FontSize="16"></Label>
+                            <TextBox x:Name="DescriptionWorld" Width="199" Height="60px" FontFamily="Comic Sans MS" FontSize="16" VerticalScrollBarVisibility="Auto"></TextBox>
+                        </StackPanel>
+                        <Separator/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="CreateButton" Content="Создать" Click="CreateButton_Click" Width="335" FontFamily="Comic Sans MS" FontSize="16"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+                <Expander Grid.Row="2" Grid.Column="0" Header="Запустить сохранённый мир" VerticalAlignment="Top" HorizontalAlignment="Center" FontFamily="Comic Sans MS" FontSize="20">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Название мира:" FontFamily="Comic Sans MS" FontSize="16"></Label>
+                            <TextBox x:Name="SavedWorldName" Width="200px" FontFamily="Comic Sans MS" FontSize="16"></TextBox>
+                        </StackPanel>
+                        <Separator/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="OpenButton" Content="Открыть" Click="OpenButton_Click" Width="330" FontFamily="Comic Sans MS" FontSize="16"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+            </Grid>
+        </Canvas>
+        <Grid Panel.ZIndex="1000">
+            <Button x:Name="MenuButton" Style="{DynamicResource DefaultButtonStyle}" Content="&gt;" Margin="0,127,355,0" HorizontalAlignment="Right" Width="20" Height="70" VerticalAlignment="Top" Background="#50FFFFFF" Foreground="White" BorderBrush="#50FFFFFF" Click="Button_Click_1"/>
+            <ListBox x:Name="InnerMenu" Margin="0,0,0,1" HorizontalAlignment="Right" Width="353">
+                <Expander ExpandDirection="Down" Header="Базовые фигуры">
+                    <StackPanel>
+                        <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
+                            <Ellipse Width="45" Height="45" Fill="#FFF50000" VerticalAlignment="Center" HorizontalAlignment="Left"></Ellipse>
+                            <Button x:Name="MenuItem1" Style="{DynamicResource DefaultButtonStyle}" Content="Ellipse" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="39" BorderBrush="#00DDDDDD" Tag="Ellipse" Click="MenuItem_Click"/>
+                        </StackPanel>
+                        <Separator/>
+                        <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
+                            <Rectangle Width="45" Height="45" Fill="#FFF50000" VerticalAlignment="Center" HorizontalAlignment="Left"></Rectangle>
+                            <Button x:Name="MenuItem2" Style="{DynamicResource DefaultButtonStyle}" Content="Rectangle" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="37" BorderBrush="#00DDDDDD" Tag="Rectangle" Click="MenuItem_Click"/>
+                        </StackPanel>
+                        <Separator/>
+                        <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
+                            <Line X1="0" Y1="0" X2="45" Y2="45" Stroke="#FFF50000" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Left"></Line>
+                            <Button x:Name="MenuItem3" Style="{DynamicResource DefaultButtonStyle}" Content="Line" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="44" BorderBrush="#00DDDDDD" Tag="Line" Click="MenuItem_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+            </ListBox>
+            <Menu Height="24" VerticalAlignment="Top" Margin="0,0,886,0" HorizontalAlignment="Right" Width="160">
+                <MenuItem x:Name="StopResumeButton" Background="Red" Width="40" Height="24" Click="StopResumeButton_Click"></MenuItem>
+                <MenuItem x:Name="Rewind" Background="Black" Width="40" Height="24"></MenuItem>
+                <MenuItem x:Name="FlashForward" Background="Black" Width="40" Height="24"></MenuItem>
+                <MenuItem x:Name="TimeManager" Background="Black" Width="40" Height="24"></MenuItem>
+            </Menu>
         </Grid>
     </Grid>
 </Window>
