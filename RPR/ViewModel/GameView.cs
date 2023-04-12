@@ -1,12 +1,10 @@
 ﻿using RPR.Model;
-using RPR.Shapes;
 using RPR.View;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace RPR.ViewModel
@@ -14,10 +12,10 @@ namespace RPR.ViewModel
     public class GameView : BaseView
     {
         protected bool MoveCamera { get; set; }
-        public Coords Coords { get; protected set; }
+        public Coords? Coords { get; protected set; }
         public int FrameSpeed { get; set; }
         public double WheelDelay { get; set; }
-        public ManagerShapes ManagerShapes { get; init; }
+        public World World { get; init; }
 
         public GameView(ref Canvas view, string? WorldName = null)
         {
@@ -27,29 +25,34 @@ namespace RPR.ViewModel
             View.MouseWheel += View_MouseWheel;
             MoveCamera = false;
 
-            FrameSpeed = 1000 / 144;
+            FrameSpeed = 1000 / 1000;
             WheelDelay = 2.0;
+            if (WorldName != null)
+            {
+                World = World.Deserialize(WorldName);
+                if (World == null)
+                {
+                    World = new World();
+                    World.InitWorld();
+                    World.SetWorldName(WorldName);
+                }
+            }
 
-            Camera = new Camera();
-            Camera.OnUpdatePosition += Camera_OnUpdatePosition;
-            Camera.OnUpdateProjection += Camera_OnUpdateProjection;
-            Camera.OnUpdateRateSize += Camera_OnUpdateRateSize;
-            Camera.UpdateRateSize(1);
-            Camera.UpdateProjections(View.ActualWidth / Camera.Rate_Size, View.ActualHeight / Camera.Rate_Size);
+            World.Camera.OnUpdatePosition += Camera_OnUpdatePosition;
+            World.Camera.OnUpdateProjection += Camera_OnUpdateProjection;
 
-            ManagerShapes = new ManagerShapes(WorldName);
+            World.Camera.UpdateProjections(View.ActualWidth, View.ActualHeight);
         }
 
         private void View_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            Camera.UpdateRateSize(Camera.Rate_Size / (e.Delta < 0 ? WheelDelay : 1 / WheelDelay));
+            // Camera.UpdateRateSize(Camera.Rate_SizeX / (e.Delta < 0 ? WheelDelay : 1 / WheelDelay), Camera.Rate_SizeY / (e.Delta < 0 ? WheelDelay : 1 / WheelDelay));
         }
 
         private void View_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             var rate = Math.Sqrt(e.NewSize.Width + e.NewSize.Height) / Math.Sqrt(e.PreviousSize.Width + e.PreviousSize.Height);
-            Camera.UpdateRateSize(Camera.Rate_Size * rate);
-            Camera.UpdateProjections(View.ActualWidth, View.ActualHeight);
+            World.Camera.UpdateProjections(View.ActualWidth, View.ActualHeight);
         }
 
         Point? new_p = null;
@@ -69,7 +72,7 @@ namespace RPR.ViewModel
                     Vector vector = (Vector)(new_p - old_p);
                     vector.X *= -1;
 
-                    Camera.UpdatePosition(vector);
+                    World.Camera.UpdatePosition(vector);
                     old_p = new_p;
                     new_p = null;
                     MoveCamera = false;
@@ -84,21 +87,18 @@ namespace RPR.ViewModel
 
         protected bool IsInException(FrameworkElement element)
         {
-            if (!(element is Shape)) return true;
-            if (element is TestShape) return true;
-            if (!element.Tag.Equals("View_Shape")) return true;
-            return false;
-        }
-
-        private void Camera_OnUpdateRateSize(Camera camera, EventArgsCamera e)
-        {
-            foreach (FrameworkElement child in this.View.Children)
+            try
             {
-                if (IsInException(child)) continue;
-                child.Width = child.Width * e.RateSize.Y / e.RateSize.X > 0 ? child.Width * e.RateSize.Y / e.RateSize.X : child.Width;
-                child.Height = child.Height * e.RateSize.Y / e.RateSize.X > 0 ? child.Height * e.RateSize.Y / e.RateSize.X : child.Height;
+                if (!(element is Shape)) return true;
+                if (element is TestShape) return true;
+                if (!element.Tag.Equals("View_Shape")) return true;
+                return false;
             }
-            Coords?.Update(e);
+            catch (Exception ex)
+            {
+                return true;
+            }
+
         }
 
         private void Camera_OnUpdateProjection(Camera camera, EventArgsCamera e)
@@ -132,7 +132,7 @@ namespace RPR.ViewModel
             Line X = new Line();
             Line Y = new Line();
             var view = View;
-            var camera = Camera;
+            var camera = World.Camera;
             Coords = new Coords(ref X, ref Y, ref view, ref camera);
             Coords.Init();
 
@@ -140,20 +140,22 @@ namespace RPR.ViewModel
             Update(Coords.Y);
         }
 
-        async public override void Init()
+        public override async void Init()
         {
             InitCoords();
 
             //InitElements
             Update();
-            
+            World.Camera.UpdatePosition(new Vector()); //обновление позиции
+
             IsInitialized = true;
             //InitLoop
-            for (; IsInitialized;)
-            {
-                ManagerShapes.ShapesFollowTheRules();
-                await Task.Delay(FrameSpeed);
-            }
+            World.ManagerShapes.StartRulles();
+            //while (IsInitialized)
+            //{
+            //    Update();
+            //    await Task.Delay(100);
+            //}
         }
 
         public override void DeInit()
@@ -180,9 +182,9 @@ namespace RPR.ViewModel
         /// <summary>
         /// Update from ManagerShapes
         /// </summary>
-        protected void Update()
+        public void Update()
         {
-            foreach (var elem in ManagerShapes.World.SmartShapes)
+            foreach (var elem in World.ManagerShapes.Shapes)
                 Update(elem.GetShape());
         }
 
@@ -205,13 +207,13 @@ namespace RPR.ViewModel
 
         public Point GetPointMouseInWordl(Point point_rel_canvas)
         {
-            var vector = point_rel_canvas - Camera.PositionRelativeCanvas;
+            var vector = point_rel_canvas - new Point(View.ActualWidth / 2, View.ActualHeight / 2);
             vector.Y *= -1;
-            var result = Camera.Position + vector;
+            var result = World.Camera.Position + vector;
             return result;
         }
 
         public void Save() =>
-            ManagerShapes.Serialize();
+            World.Serialize();
     }
 }

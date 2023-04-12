@@ -8,7 +8,6 @@ namespace RPR.Model
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public Action<ArgsSmartShapes> Instruction { get; set; }
         public List<string> TextRules { get; }
     }
 
@@ -25,12 +24,17 @@ namespace RPR.Model
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public Action<ArgsSmartShapes> Instruction { get; set; }
+        protected Action<ArgsSmartShapes> Instruction { get; set; }
         public List<string> TextRules { get; }
 
         public Rule()
         {
-            TextRules= new List<string>();
+            TextRules = new List<string>();
         }
+
+        public void SetInstrution(Action<ArgsSmartShapes> instruction) =>
+            this.Instruction = instruction;
+
+        public Action<ArgsSmartShapes> GetInstruction() => this.Instruction;
     }
 }
