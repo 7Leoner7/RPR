@@ -39,12 +39,12 @@ namespace RPR.Model
             {
                 if (shape.Equals(SmartShapes[j])) continue;
 
-                if (shape.IsCollisionBounds(SmartShapes[j]))
+                if (shape.IsCollisionBounds(SmartShapes[j])) 
                 {
                     args.Called_Shape = SmartShapes[j];
                     args.Bound_Collision = true;
                 }
-                if (shape.FindCollissionBetweenShapes(SmartShapes[j]))
+                if (shape.FindCollissionBetweenShapes(SmartShapes[j]))//!!!
                 {
                     args.Inner_Collision = true;
                 }

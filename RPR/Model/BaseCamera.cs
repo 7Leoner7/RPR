@@ -6,8 +6,8 @@ namespace RPR.Model
     public interface IBaseCamera
     {
         public double Zoom { get; set; }
-        public double WidthProjection { get; set; }
-        public double HeightProjection { get; set; }
+        static public double WidthProjection { get; set; }
+        static public double HeightProjection { get; set; }
 
         public Matrix Matrix { get; set; }
 

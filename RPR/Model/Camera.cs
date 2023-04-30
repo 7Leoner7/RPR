@@ -6,8 +6,8 @@ namespace RPR.Model
     public class Camera : IBaseCamera
     {
         public double Zoom { get; set; }
-        public double WidthProjection { get; set; }
-        public double HeightProjection { get; set; }
+        static public double WidthProjection { get; set; }
+        static public double HeightProjection { get; set; }
 
         public Matrix Matrix { get; set; }
 
@@ -57,8 +57,8 @@ namespace RPR.Model
                 Matrix = this.Matrix,
                 Zoom = new Vector(Zoom, Zoom)
             };
-            this.WidthProjection = width;
-            this.HeightProjection = height;
+            WidthProjection = width;
+            HeightProjection = height;
             OnUpdateProjection?.Invoke(this, CameraEvent);
         }
 
@@ -81,6 +81,17 @@ namespace RPR.Model
             UpdatePosition(new Vector(-this.Position.X, -this.Position.Y));
         }
 
+        public Point GetPossitionFromMarginPoint(Point margin_point)
+        {
+            var abs_point = new Point(WidthProjection / 2 - this.Position.X, HeightProjection / 2 + this.Position.Y);
+            return new Point(margin_point.X - abs_point.X, abs_point.Y - margin_point.Y);
+        }
+
+        public Point GetMarginPointFromPossition(Point possition)
+        {
+            var abs_point = new Point(WidthProjection / 2 - this.Position.X, HeightProjection / 2 + this.Position.Y);
+            return new Point(possition.X + abs_point.X, abs_point.Y - possition.Y);
+        }
     }
 
     public class EventArgsCamera

@@ -51,26 +51,70 @@
         </Canvas>
         <Grid Panel.ZIndex="1000">
             <Button x:Name="MenuButton" Style="{DynamicResource DefaultButtonStyle}" Content="&gt;" Margin="0,127,355,0" HorizontalAlignment="Right" Width="20" Height="70" VerticalAlignment="Top" Background="#50FFFFFF" Foreground="White" BorderBrush="#50FFFFFF" Click="Button_Click_1"/>
-            <ListBox x:Name="InnerMenu" Margin="0,0,0,1" HorizontalAlignment="Right" Width="353">
-                <Expander ExpandDirection="Down" Header="Базовые фигуры">
-                    <StackPanel>
-                        <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
-                            <Ellipse Width="45" Height="45" Fill="#FFF50000" VerticalAlignment="Center" HorizontalAlignment="Left"></Ellipse>
-                            <Button x:Name="MenuItem1" Style="{DynamicResource DefaultButtonStyle}" Content="Ellipse" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="39" BorderBrush="#00DDDDDD" Tag="Ellipse" Click="MenuItem_Click"/>
+            <StackPanel x:Name="InnerMenu" Margin="0,0,0,1" HorizontalAlignment="Right" Width="353" Background="White">
+                <StackPanel x:Name="StackMenu0">
+                    <Expander ExpandDirection="Down" Header="Базовые фигуры">
+                        <StackPanel>
+                            <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
+                                <Ellipse Width="45" Height="45" Fill="#FFF50000" VerticalAlignment="Center" HorizontalAlignment="Left"></Ellipse>
+                                <Button x:Name="MenuItem1" Style="{DynamicResource DefaultButtonStyle}" Content="Ellipse" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="39" BorderBrush="#00DDDDDD" Tag="Ellipse" Click="MenuItem_Click"/>
+                            </StackPanel>
+                            <Separator/>
+                            <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
+                                <Rectangle Width="45" Height="45" Fill="#FFF50000" VerticalAlignment="Center" HorizontalAlignment="Left"></Rectangle>
+                                <Button x:Name="MenuItem2" Style="{DynamicResource DefaultButtonStyle}" Content="Rectangle" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="37" BorderBrush="#00DDDDDD" Tag="Rectangle" Click="MenuItem_Click"/>
+                            </StackPanel>
                         </StackPanel>
-                        <Separator/>
-                        <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
-                            <Rectangle Width="45" Height="45" Fill="#FFF50000" VerticalAlignment="Center" HorizontalAlignment="Left"></Rectangle>
-                            <Button x:Name="MenuItem2" Style="{DynamicResource DefaultButtonStyle}" Content="Rectangle" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="37" BorderBrush="#00DDDDDD" Tag="Rectangle" Click="MenuItem_Click"/>
-                        </StackPanel>
-                        <Separator/>
-                        <StackPanel Background="#FF7B7676" Width="345" Orientation="Horizontal">
-                            <Line X1="0" Y1="0" X2="45" Y2="45" Stroke="#FFF50000" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Left"></Line>
-                            <Button x:Name="MenuItem3" Style="{DynamicResource DefaultButtonStyle}" Content="Line" Foreground="#FFF9F6F6" VerticalAlignment="Center" Background="#00DDDDDD" Width="296" Height="44" BorderBrush="#00DDDDDD" Tag="Line" Click="MenuItem_Click"/>
-                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+                <StackPanel x:Name="StackMenu1" Visibility="Hidden">
+                    <Label Content="Свойства" FontFamily="Comic Sans MS" FontSize="20" FontWeight="Bold"></Label>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Fill:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TFill" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="270" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
                     </StackPanel>
-                </Expander>
-            </ListBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Width:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TWidth" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="246" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Height:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="THeight" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="242" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Stroke:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TStroke" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="241" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="StrokeThickness:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TStrokeThickness" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="166" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Tag:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TTag" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="265" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Possition:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TPossition" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="227" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Velocity:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TVelocity" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="227" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <Separator Height="100"></Separator>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Name Rule:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TName_Rule" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="227" TextChanged="StackMenu1_TItem_TextChanged"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Rules:" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold"></Label>
+                        <TextBox x:Name="TRule" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" Width="260" Height="217" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"></TextBox>
+                    </StackPanel>
+                    <Button Style="{DynamicResource DefaultButtonStyle}" Content="Сохранить правило" Click="StackMenu1_Save_Button_Click"></Button>
+                    <Separator Height="100"></Separator>
+                    <Button Style="{DynamicResource DefaultButtonStyle}" Content="Удалить объект" Click="StackMenu1_Delete_Button_Click"></Button>
+                </StackPanel>
+            </StackPanel>
             <Menu Height="24" VerticalAlignment="Top" Margin="0,0,886,0" HorizontalAlignment="Right" Width="160">
                 <MenuItem x:Name="StopResumeButton" Background="Red" Width="40" Height="24" Click="StopResumeButton_Click"></MenuItem>
                 <MenuItem x:Name="Rewind" Background="Black" Width="40" Height="24"></MenuItem>

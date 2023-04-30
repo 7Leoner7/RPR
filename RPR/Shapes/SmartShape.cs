@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json.Linq;
 using RPR.Model;
+using RPR.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -89,11 +91,12 @@ public class Rule
         {
             get =>
                 XamlWriter.Save(Shape);
-            set {
+            set
+            {
                 _xmlShape = value;
                 InitShapeFromXml();
             }
-                
+
         }
 
         public JObject? Data
@@ -113,32 +116,46 @@ public class Rule
         public double GetHeight() => Shape.Height;
         public void SetHeight(double height) => Shape.Height = height;
 
-        public Brush GetStroke() => Shape.Stroke;
+        public Brush? GetStroke() => Shape.Stroke;
         public void SetStroke(Brush brush) => Shape.Stroke = brush;
 
         public double GetStrokeThickness() => Shape.StrokeThickness;
         public void SetStrokeThickness(double thickness) => Shape.StrokeThickness = thickness;
-        
+
         public object GetTag() => Shape.Tag;
         public void SetTag(object tag) => Shape.Tag = tag;
+
+        protected Point possition;
 
         /// <summary>
         /// Possition relative center of shape bounds
         /// </summary>
+        public Point PossitionRC
+        {
+            get
+            {
+                return new Point(possition.X - Shape.Width / 2, possition.Y - Shape.Height / 2);
+            }
+        }
+
         public Point Possition
         {
             get
             {
-                return new Point(Shape.Margin.Left + Shape.ActualWidth / 2, Shape.Margin.Top + Shape.ActualHeight / 2);
+                return possition;
             }
             set
             {
+                possition = value;
+                if (GameView.World == null) return;
+
+                var temp_point = GameView.World.Camera.GetMarginPointFromPossition(value);
                 Shape.Margin = new Thickness()
                 {
-                    Left = value.X - Shape.ActualWidth / 2,
-                    Top = value.Y - Shape.ActualHeight / 2,
                     Bottom = 0,
                     Right = 0,
+                    Left = temp_point.X,
+                    Top = temp_point.Y,
                 };
             }
         }
@@ -155,26 +172,30 @@ public class Rule
         public ISmartShape GetInterface() =>
             this;
 
-        protected bool ChisloInRage(double start, double end, double chislo)
-        {
-            return (start <= chislo) && (end >= chislo);
-        }
+        private bool InRange(double number, double min, double max)=>
+            number>=min && number<=max;
 
-        public bool IsCollisionBounds(SmartShape sender)
+        public bool IsCollisionBounds(SmartShape sender)//???
         {
             if (Shape.RenderedGeometry == null) return false;
             if (sender.GetShape().RenderedGeometry == null) return false;
 
-            var ThisPointB = new Point(Possition.X - Shape.Width / 2, Possition.Y - Shape.Height / 2);
-            var SenderPointB = new Point(sender.Possition.X - sender.Shape.Width / 2, sender.Possition.Y - sender.Shape.Height / 2);
+            //if(GetFill().ToString() == "#FFFFFFAA")
+            //{
 
-            var ThisPointE = new Vector(Shape.Width, Shape.Height) + ThisPointB;
-            var SenderPointE = new Vector(sender.Shape.Width, sender.Shape.Height) + SenderPointB;
+            //}
 
-            var collision = (ChisloInRage(ThisPointB.X, ThisPointE.X, SenderPointB.X) || ChisloInRage(ThisPointB.X, ThisPointE.X, SenderPointE.X)) &&
-                (ChisloInRage(ThisPointB.Y, ThisPointE.Y, SenderPointB.Y) || ChisloInRage(ThisPointB.Y, ThisPointE.Y, SenderPointE.Y));
+            var colllisX = InRange(Possition.X, sender.Possition.X, sender.Possition.X + sender.GetWidth())||
+                InRange(Possition.X + GetWidth(), sender.Possition.X, sender.Possition.X + sender.GetWidth())||
+                InRange(sender.Possition.X, Possition.X, Possition.X + GetWidth()) ||
+                InRange(sender.Possition.X + sender.GetWidth(), Possition.X, Possition.X + GetWidth());
 
-            return collision;
+            var colllisY = InRange(Possition.Y, sender.Possition.Y - sender.GetHeight(), sender.Possition.Y) ||
+                InRange(Possition.Y - GetHeight(), sender.Possition.Y - sender.GetHeight(), sender.Possition.Y) ||
+                InRange(sender.Possition.Y, Possition.Y - GetHeight(), Possition.Y) ||
+                InRange(sender.Possition.Y - sender.GetHeight(), Possition.Y - GetHeight(), Possition.Y);
+
+            return colllisX && colllisY;
         }
 
         public bool FindCollissionBetweenShapes(SmartShape caller) //Non-implemented
@@ -183,72 +204,88 @@ public class Rule
             var geometry_caller = caller.Shape.RenderedGeometry.GetWidenedPathGeometry(new Pen()).Figures;
 
             var vec = Possition - caller.Possition;
-
+            
             return false;
         }
 
+        public bool ProcessBegin { get; set; }
+
         public void StartFollowRulles()
         {
-            if(Rules.Count== 0) return;
+            if (Rules.Count == 0) return;
 
             if (Rules[0].GetInstruction() == null) InitShape();
-            Shape.Dispatcher.Invoke(async () => {
-                while (true)
+
+            ProcessBegin = true;
+
+            Shape.Dispatcher.Invoke(async () =>
+            {
+                while (ProcessBegin)
                 {
                     if (ManagerShapes.ProcessIsStoped)
                     {
                         return;
                     }
-                    if (World.TimeStoped) { 
-                        await Task.Delay(10); 
-                        continue; 
+                    if (World.TimeStoped)
+                    {
+                        await Task.Delay(10);
+                        continue;
                     }
                     var args = ManagerShapes.GetArgsSmartShape(this);
                     if (args == null) continue;
                     Rules[0].GetInstruction()?.Invoke(args);
-                    await Task.Delay(1);
+                    await Task.Delay(10);
                 }
             });
         }
 
-        protected void InitShape()
+        private void MouseGetShape(object sender, MouseEventArgs e)
         {
+            ShellMenu.TargetShape = this;
+            ShellMenu.OpenMenu();
+        }
+
+        public void InitShape()
+        {
+            if (Shape == null) return;
+
+            Shape.MouseDown += MouseGetShape;
+
             if (Rules.Count > 0)
             {
                 CreateRulesOfAssembly(this.assemblyPath + "\\" + Rules[0].Name + ".dll", 0);
                 return;
             }
             //  return;
-            var CollisionRule = @"
-            if(args.Bound_Collision){
-                var vector = args.Sender.Possition - args.Called_Shape.Possition;
-                args.Sender.Possition += vector;
-                args.Called_Shape.Possition -= vector;
-                args.Sender.SetFill(new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))));
-                args.Sender.SetStroke(new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))));
-            }";
+            //var CollisionRule = @"var rand = new Random();
+            //args.Sender.Possition += new Vector(Math.Cos(args.WorldArgs.CurrentTime/100d), Math.Sin(args.WorldArgs.CurrentTime/100d));
+            //if(args.Bound_Collision){
+            //    var vector = args.Sender.Possition - args.Called_Shape.Possition;
+            //    args.Sender.Possition += vector;
+            //    args.Called_Shape.Possition -= vector;
+            //    args.Sender.SetFill(new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))));
+            //    args.Sender.SetStroke(new SolidColorBrush(Color.FromArgb((byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255))));
+            //}";
             Rule rule = new Rule();
-
-            rule.TextRules.Add(@"var rand = new Random();");
-            rule.TextRules.Add("args.Sender.Possition = new Point(args.Sender.Possition.X + Math.Cos(args.WorldArgs.CurrentTime/100d), args.Sender.Possition.Y + Math.Sin(args.WorldArgs.CurrentTime/100d));");
-            rule.TextRules.Add(CollisionRule);
+            
+            rule.TextRules.Add("");
             Rules.Add(rule);
-            DirectoryInfo info = new DirectoryInfo(assemblyPath);
-            if (!info.Exists)
-                Directory.CreateDirectory(info.FullName);
-            CompileAllRules();
+            //DirectoryInfo info = new DirectoryInfo(assemblyPath);
+            //if (!info.Exists)
+            //    Directory.CreateDirectory(info.FullName);
+            //CompileAllRules();
         }
 
         public bool CreateRulesOfAssembly(string assemblyPath, int num_rule)
         {
             try
             {
-                Assembly assembly = Assembly.LoadFile(assemblyPath);
-
+                Assembly assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                
                 if (assembly == null) return false;
                 Action<ArgsSmartShapes> action = (Action<ArgsSmartShapes>)Delegate.CreateDelegate(typeof(Action<ArgsSmartShapes>),
                     assembly.GetType("Rule").GetMethod("Main", BindingFlags.Static | BindingFlags.Public | BindingFlags.InvokeMethod));
-
+               
                 Rules[num_rule].SetInstrution(action);
                 return true;
             }
@@ -274,6 +311,7 @@ public class Rule
         public string? CompileRule(int number_rule)
         {
             if (Rules.Count == 0) return null;
+            if (Rules[number_rule].GetInstruction() != null) return Rules[number_rule].Name;
 
             var textRules = string.Join(null, Rules[number_rule].TextRules);
 
@@ -327,7 +365,7 @@ public class Rule
 
         public void UpdateRule(Rule Rule, int Position_Rule)
         {
-            if (Rules.Count < Position_Rule)
+            if (Rules.Count > Position_Rule)
             {
                 Rules.RemoveAt(Position_Rule);
                 Rules.Add(Rule);

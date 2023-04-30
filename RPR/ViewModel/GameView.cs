@@ -2,7 +2,6 @@
 using RPR.View;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
@@ -15,7 +14,7 @@ namespace RPR.ViewModel
         public Coords? Coords { get; protected set; }
         public int FrameSpeed { get; set; }
         public double WheelDelay { get; set; }
-        public World World { get; init; }
+        static public World World { get; set; }
 
         public GameView(ref Canvas view, string? WorldName = null)
         {
@@ -28,8 +27,9 @@ namespace RPR.ViewModel
             FrameSpeed = 1000 / 1000;
             WheelDelay = 2.0;
             if (WorldName != null)
-            {
-                World = World.Deserialize(WorldName);
+            { 
+                World = World.Deserialize(WorldName) ?? World;
+               
                 if (World == null)
                 {
                     World = new World();
@@ -124,6 +124,7 @@ namespace RPR.ViewModel
                     Top = child.Margin.Top + e.Velocity.Y
                 };
             }
+
             Coords?.Update(e);
         }
 
