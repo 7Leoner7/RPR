@@ -204,5 +204,10 @@ namespace RPR
             game.Delete(ShellMenu.TargetShape?.GetShape());
             ShellMenu.DeleteTargetShape();
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            game.Save();
+        }
     }
 }

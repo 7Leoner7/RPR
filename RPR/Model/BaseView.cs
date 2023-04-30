@@ -6,7 +6,7 @@ namespace RPR.Model
 {
     public abstract class BaseView
     {
-        public Canvas View { get; protected set; }
+        static public Canvas View { get; protected set; }
 
         //public Camera Camera { get; protected set; }
 

@@ -104,7 +104,7 @@ namespace RPR.ViewModel
         private void Camera_OnUpdateProjection(Camera camera, EventArgsCamera e)
         {
             Coords?.Init();
-            foreach (FrameworkElement child in this.View.Children)
+            foreach (FrameworkElement child in GameView.View.Children)
             {
                 if (IsInException(child)) continue;
                 child.Margin = new Thickness(child.Margin.Left * (e.Width.Y / e.Width.X), child.Margin.Top * (e.Height.Y / e.Height.X), child.Margin.Right, child.Margin.Bottom);
@@ -113,7 +113,7 @@ namespace RPR.ViewModel
 
         private void Camera_OnUpdatePosition(Camera camera, EventArgsCamera e)
         {
-            foreach (FrameworkElement child in this.View.Children)
+            foreach (FrameworkElement child in View.Children)
             {
                 if (IsInException(child)) continue;
                 child.Margin = new Thickness()

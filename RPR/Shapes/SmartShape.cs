@@ -228,13 +228,13 @@ public class Rule
                     }
                     if (World.TimeStoped)
                     {
-                        await Task.Delay(10);
+                        await Task.Delay(100);
                         continue;
                     }
                     var args = ManagerShapes.GetArgsSmartShape(this);
                     if (args == null) continue;
                     Rules[0].GetInstruction()?.Invoke(args);
-                    await Task.Delay(10);
+                    await Task.Delay(1);
                 }
             });
         }

@@ -40,7 +40,6 @@ C:\Users\Leoner\Source\Repos\RPR\RPR\obj\Debug\net6.0-windows\refint\RPR.dll
 C:\Users\Leoner\Source\Repos\RPR\RPR\obj\Debug\net6.0-windows\RPR.pdb
 C:\Users\Leoner\Source\Repos\RPR\RPR\obj\Debug\net6.0-windows\RPR.genruntimeconfig.cache
 C:\Users\Leoner\Source\Repos\RPR\RPR\obj\Debug\net6.0-windows\ref\RPR.dll
-C:\Users\Leoner\source\repos\RPR\RPR\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\Leoner\source\repos\RPR\RPR\obj\Debug\net6.0-windows\App.baml
 C:\Users\Leoner\source\repos\RPR\RPR\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
 C:\Users\Leoner\source\repos\RPR\RPR\obj\Debug\net6.0-windows\RPR.csproj.CopyComplete

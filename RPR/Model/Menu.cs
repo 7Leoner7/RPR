@@ -96,6 +96,7 @@ namespace RPR
             {
                 var panel = (StackPanel)MenuView.FindName("StackMenu0");
                 panel.Visibility = System.Windows.Visibility.Visible;
+                panel.Height = GameView.View.Height;
 
                 panel = (StackPanel)MenuView.FindName("StackMenu1");
                 panel.Visibility = System.Windows.Visibility.Hidden;
@@ -104,6 +105,8 @@ namespace RPR
             {
                 var panel = (StackPanel)MenuView.FindName("StackMenu0");
                 panel.Visibility = System.Windows.Visibility.Hidden;
+
+                panel.Height = 0;
 
                 panel = (StackPanel)MenuView.FindName("StackMenu1");
                 panel.Visibility = System.Windows.Visibility.Visible;
