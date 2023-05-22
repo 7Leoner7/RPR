@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RPR.Shapes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -75,6 +74,7 @@ namespace RPR.Model
                 TimeStep();
                 await Task.Delay(1);
             }
+            Time = 0;
         }
 
         public static WorldArgs GetWorldArgs()=>
